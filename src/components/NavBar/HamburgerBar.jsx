@@ -2,7 +2,7 @@ function HamburgerBar() {
   return (
     <button 
       type="button"
-      className="min-[1024px]:hidden focus:outline-none p-2"
+      className="lg:hidden focus:outline-none p-2"
       aria-label="Menu"
     >
       <svg 

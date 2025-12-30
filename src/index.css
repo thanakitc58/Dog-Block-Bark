@@ -9,6 +9,7 @@ html, body {
   width: 100%;
   overflow-x: hidden;
   font-family: "Poppins", sans-serif;
+  background-color: #F9F8F6;
 }
 
 * {
@@ -56,6 +57,28 @@ html, body {
   --color-brand-red: #eb5164;
   --color-white: #ffffff;
   --color-headline-1: #1a1a2c;
+
+  /* shadcn/ui CSS Variables */
+  --color-background: #ffffff;
+  --color-foreground: #26231e;
+  --color-card: #ffffff;
+  --color-card-foreground: #26231e;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #26231e;
+  --color-primary: #26231e;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f9f8f6;
+  --color-secondary-foreground: #26231e;
+  --color-muted: #f9f8f6;
+  --color-muted-foreground: #75716b;
+  --color-accent: #f9f8f6;
+  --color-accent-foreground: #26231e;
+  --color-destructive: #eb5164;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #dad6d1;
+  --color-input: #dad6d1;
+  --color-ring: #26231e;
+  --radius: 0.5rem;
 }
 
 /* Typography Utility Classes */
