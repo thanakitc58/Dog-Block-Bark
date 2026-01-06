@@ -2,7 +2,7 @@ import { Linkedin, Github } from "lucide-react"
 
 function Footer() {
   return (
-    <footer className="w-full bg-[#EFEEEB]">
+    <footer className="w-full bg-[#EFEEEB] lg:static">
       <div className="w-full max-w-[1440px] h-[144px] mx-auto mt-[50px] px-4 pt-10 pb-6 lg:px-[120px] lg:py-[60px] flex flex-col items-center gap-4 lg:flex-row lg:justify-between lg:items-center">
         {/* Top Section - Get in touch and Social Icons */}
         <div className="flex flex-row items-center justify-center lg:justify-start gap-4">
@@ -23,7 +23,9 @@ function Footer() {
 
             {/* GitHub Icon */}
             <a 
-              href="#" 
+              href="https://github.com/thanakitc58" 
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="GitHub"
               className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors"
             >

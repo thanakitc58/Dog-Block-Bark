@@ -2,7 +2,7 @@ import mainImage from '../../assets/images/main.jpg'
 
 function HeroSection() {
   return (
-    <section className="w-full min-h-full lg:min-h-[529px] lg:mt-[50px] mx-auto pt-5 pb-10 px-4 lg:px-[120px] bg-[#F9F8F6] flex flex-col lg:flex-row items-center lg:items-start justify-center lg:gap-[60px] gap-10">
+    <section className="w-full min-h-full lg:min-h-[529px] mx-auto pt-[68px] lg:pt-[130px] pb-10 px-4 lg:px-[120px] bg-[#F9F8F6] flex flex-col lg:flex-row items-center lg:items-start justify-center lg:gap-[60px] gap-10">
       {/* Div 1 - Title Section */}
       <div className="w-full lg:w-[347px] h-auto lg:h-[276px] opacity-100 flex flex-col gap-6 lg:gap-6 lg:pt-0 xl:mt-[126px]">
         {/* Title */}
@@ -24,7 +24,7 @@ function HeroSection() {
 
       {/* Div 2 - Pic Section */}
       <div 
-        className="w-full lg:w-[386px] h-[470px] lg:h-[529px] opacity-100 rounded-2xl lg:rounded-[16px] "
+        className="relative w-full lg:w-[386px] h-[470px] lg:h-[529px] opacity-100 rounded-2xl lg:rounded-[16px] overflow-hidden group cursor-pointer"
         style={{
           background: 'linear-gradient(0deg, #FFFFFF, #FFFFFF), linear-gradient(0deg, rgba(190, 187, 177, 0.25), rgba(190, 187, 177, 0.25))'
         }}
@@ -32,8 +32,9 @@ function HeroSection() {
         <img 
           src={mainImage} 
           alt="Author with cat" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:brightness-105"
         />
+        <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-2xl lg:rounded-[16px] pointer-events-none"></div>
       </div>
 
       {/* Div 3 - Description Section */}

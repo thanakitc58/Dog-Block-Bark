@@ -60,7 +60,7 @@ const blogPosts = [
     image:
       "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/g8qpepvgnz6gioylyhrz.jpg",
     category: "Inspiration",
-    title: "The Power of Habits: Small Changes, Big Results",
+    title: "The Power of Habits: Small Changes, Big Results แมว",
     description:
       "Discover how small, consistent habits can lead to significant personal and professional growth over time.",
     author: "Thompson P.",
@@ -76,7 +76,7 @@ const blogPosts = [
     category: "Cat",
     title: "Cat Nutrition: A Guide to Feeding Your Feline Friend",
     description:
-      "Learn about the nutritional needs of cats and how to provide a balanced diet for optimal health and longevity.",
+      "Learn about the nutritional needs of cats and how to provide a balanced diet for optimal health and longevity เทส.",
     author: "Thompson P.",
     date: "21 July 2024",
     likes: 555,

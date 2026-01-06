@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Search as SearchIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import {
@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
-function Search() {
-  const [category, setCategory] = useState("highlight")
+function Search({ category, onCategoryChange, searchQuery, onSearchChange }) {
 
   // Function to format category display (capitalize first letter)
   const formatCategory = (value) => {
@@ -23,17 +22,17 @@ function Search() {
   // Category options mapping
   const categoryOptions = {
     highlight: "Highlight",
+    general: "General",
     cat: "Cat",
-    inspiration: "Inspiration",
-    ganeral: "Ganeral"
+    inspiration: "Inspiration"
   }
 
   // Category options for desktop pills
   const categories = [
     { value: "highlight", label: "Highlight" },
+    { value: "general", label: "General" },
     { value: "cat", label: "Cat" },
-    { value: "inspiration", label: "Inspiration" },
-    { value: "ganeral", label: "Ganeral" }
+    { value: "inspiration", label: "Inspiration" }
   ]
 
   return (
@@ -57,7 +56,9 @@ function Search() {
         <div className="relative w-full min-[1024px]:w-auto min-[1024px]:shrink-0 order-1 min-[1024px]:order-2">
           <Input 
             type="text" 
-            placeholder="Search" 
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="w-full min-[1024px]:w-[300px] h-12 pt-3 pr-10 pb-3 pl-4 rounded-lg border border-brown-300"
           />
           <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brown-400 pointer-events-none" />
@@ -69,7 +70,7 @@ function Search() {
           <label className="font-sans text-body-3 text-brown-400">
             Category
           </label>
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={onCategoryChange}>
             <SelectTrigger className="w-full h-12 rounded-lg">
               <SelectValue placeholder="Select category">
                 {categoryOptions[category] || formatCategory(category)}
@@ -78,9 +79,9 @@ function Search() {
             <SelectContent>
               <SelectGroup>
                 <SelectItem value="highlight">Highlight</SelectItem>
+                <SelectItem value="general">General</SelectItem>
                 <SelectItem value="cat">Cat</SelectItem>
                 <SelectItem value="inspiration">Inspiration</SelectItem>
-                <SelectItem value="ganeral">Ganeral</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -91,7 +92,7 @@ function Search() {
           {categories.map((cat) => (
             <button
               key={cat.value}
-              onClick={() => setCategory(cat.value)}
+              onClick={() => onCategoryChange(cat.value)}
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap",
                 category === cat.value
