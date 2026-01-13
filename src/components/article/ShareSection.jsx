@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import LoginModal from './LoginModal'
 
 /**
@@ -16,6 +17,8 @@ import LoginModal from './LoginModal'
  * - Responsive design (375px for mobile, responsive for larger screens)
  */
 function ShareSection({ initialLikes = 0 }) {
+  const navigate = useNavigate()
+  
   // Mock authentication state (replace with actual auth check)
   const [isLoggedIn] = useState(false)
   
@@ -42,15 +45,13 @@ function ShareSection({ initialLikes = 0 }) {
   }
 
   const handleCreateAccount = () => {
-    // TODO: Navigate to signup page or handle signup
-    console.log('Navigate to create account')
     setShowLoginModal(false)
+    navigate('/signup')
   }
 
   const handleLogin = () => {
-    // TODO: Navigate to login page or handle login
-    console.log('Navigate to login')
     setShowLoginModal(false)
+    navigate('/login')
   }
 
   const handleCopyLink = async () => {
