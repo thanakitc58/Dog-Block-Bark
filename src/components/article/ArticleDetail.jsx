@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import NavBar from '../NavBar/NavBar'
 import Footer from '../footer/footer'
+import AuthorBio from '../HeroSection/AuthorBio'
+import ShareSection from './ShareSection'
 
 function ArticleDetail({ article, onBack }) {
   // Scroll to top when component mounts or article changes
@@ -16,7 +18,7 @@ function ArticleDetail({ article, onBack }) {
     <div className="min-h-screen bg-[#F9F8F6] flex flex-col">
       {/* NavBar - Sticky for mobile */}
       <div className="lg:static">
-        <NavBar onLogoClick={onBack} />
+        <NavBar />
       </div>
       
       {/* Article Detail Container */}
@@ -73,20 +75,18 @@ function ArticleDetail({ article, onBack }) {
             )}
           </div>
 
-          {/* Author Info */}
-          <div className="flex items-center mt-0 lg:mt-8 pt-0 lg:pt-8 border-t-0 lg:border-t border-brown-300">
-            <img 
-              className="w-12 h-12 rounded-full mr-4" 
-              src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg" 
-              alt={article.author} 
-            />
-            <div>
-              <p className="font-semibold text-brown-600">{article.author}</p>
-              <p className="text-sm text-brown-400">{article.date}</p>
-            </div>
-          </div>
+          {/* Author Bio Section */}
+          <AuthorBio />
         </div>
       </article>
+
+      {/* Share Section - Like, Copy Link, Social Media */}
+      {/* Full width on mobile (< lg), contained on desktop */}
+      <div className="w-full mt-6 lg:mt-8">
+        <div className="w-full lg:px-[120px]">
+          <ShareSection initialLikes={article.likes || 0} />
+        </div>
+      </div>
 
       {/* Footer - Sticky for mobile */}
       <div className="lg:static mt-auto">

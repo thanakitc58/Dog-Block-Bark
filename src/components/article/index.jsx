@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Search from './search'   
 import ArticleSection from './ArticleSection'
 
-function Article({ onArticleClick }) {
+function Article() {
   const [selectedCategory, setSelectedCategory] = useState("highlight")
   //สร้าง useState สำหรับ search query
   const [searchQuery, setSearchQuery] = useState("")
@@ -22,7 +22,6 @@ function Article({ onArticleClick }) {
         category={selectedCategory}
         //ส่ง search query ไปยัง ArticleSection
         searchQuery={searchQuery}
-        onArticleClick={onArticleClick}
       />
     </div>
   )

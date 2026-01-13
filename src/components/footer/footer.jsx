@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Linkedin, Github } from "lucide-react"
 
 function Footer() {
@@ -56,12 +57,12 @@ function Footer() {
 
         {/* Bottom Section - Home page Link */}
         <div className="flex justify-center lg:justify-end w-auto lg:w-auto">
-          <a 
-            href="#" 
+          <Link 
+            to="/"
             className="font-sans font-medium text-[16px] leading-[24px] text-brown-600 underline hover:text-brown-500 transition-colors"
           >
             Home page
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

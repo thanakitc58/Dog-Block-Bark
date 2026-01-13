@@ -4,7 +4,7 @@ import LogInBtn from "./LogInBtn";
 import SignUpBtn from "./SignUpBtn";
 import HamburgerBar from "./HamburgerBar";
 
-function NavBar({ onLogoClick }) {
+function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -26,7 +26,7 @@ function NavBar({ onLogoClick }) {
     <>
       <nav className={`w-full bg-brown-100/95 backdrop-blur-sm border-b border-[#DAD6D1] fixed top-0 left-0 right-0 z-[10000] transition-all duration-300 ${isScrolled ? 'shadow-md bg-brown-100' : ''}`}>
         <div className="w-full mx-auto h-[48px] lg:h-[80px] flex items-center justify-between pt-3 pb-3 pl-6 pr-6 lg:pt-4 lg:pb-4 lg:pl-[120px] lg:pr-[120px]">
-          <Logo onLogoClick={onLogoClick} />
+          <Logo />
           <HamburgerBar isOpen={isMenuOpen} onClick={toggleMenu} />
           <div className="hidden lg:flex items-center w-[276px] h-[48px] gap-2">
             <LogInBtn />

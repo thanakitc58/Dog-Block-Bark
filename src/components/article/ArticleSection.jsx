@@ -2,7 +2,7 @@ import React from 'react'
 import BlogCard from './BlogCard'
 import blogPosts from '../../data/blogPosts'
 
-function ArticleSection({ category, searchQuery, onArticleClick }) {
+function ArticleSection({ category, searchQuery }) {
   // Filter blog posts based on selected category AND search query
   const filteredPosts = blogPosts.filter((post) => {
     // Category filter (case-insensitive)
@@ -35,7 +35,6 @@ function ArticleSection({ category, searchQuery, onArticleClick }) {
                 description={post.description}
                 author={post.author}
                 date={post.date}
-                onArticleClick={onArticleClick}
               />
             ))
           ) : (

@@ -1,47 +1,30 @@
-import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
-import NavBar from './components/NavBar/NavBar'
-import HeroSection from './components/HeroSection/HeroSection'
-import Footer from './components/footer/footer'
-import Article from './components/article/index'
-import ArticleDetail from './components/article/ArticleDetail'
-import blogPosts from './data/blogPosts'
+import HomePage from './pages/HomePage'
+import ArticleDetailPage from './pages/ArticleDetailPage'
 
+/**
+ * App Component
+ * Main application component with routing setup
+ * 
+ * Routes:
+ * - / : Home page with article list
+ * - /article/:id : Article detail page
+ */
 function App() {
-  const [selectedArticleId, setSelectedArticleId] = useState(null)
-
-  const handleArticleClick = (articleId) => {
-    setSelectedArticleId(articleId)
-    // Scroll to top when navigating to article detail
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const handleBackToHome = () => {
-    setSelectedArticleId(null)
-    // Scroll to top when going back to home
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  // Find selected article
-  const selectedArticle = selectedArticleId 
-    ? blogPosts.find(post => post.id === selectedArticleId)
-    : null
-
   return (
-    <div>
-      {selectedArticle ? (
-        // Show Article Detail Page
-        <ArticleDetail article={selectedArticle} onBack={handleBackToHome} />
-      ) : (
-        // Show Home Page
-        <>
-          <NavBar onLogoClick={handleBackToHome} />
-          <HeroSection />
-          <Article onArticleClick={handleArticleClick} />
-          <Footer />
-        </>
-      )}
-    </div>
+    <Router>
+      <Routes>
+        {/* Home Page Route */}
+        <Route path="/" element={<HomePage />} />
+        
+        {/* Article Detail Page Route */}
+        <Route path="/article/:id" element={<ArticleDetailPage />} />
+        
+        {/* Catch all - redirect to home */}
+        <Route path="*" element={<HomePage />} />
+      </Routes>
+    </Router>
   )
 }
 

@@ -1,19 +1,14 @@
-function BlogCard({ id, image, category, title, description, author, date, onArticleClick }) {
+import { Link } from 'react-router-dom'
+
+function BlogCard({ id, image, category, title, description, author, date }) {
   // สำหรับ id 4 ให้เลื่อนภาพลงเพื่อเห็นแมว
   const imageStyle = id === 4 ? { objectPosition: 'center bottom' } : {};
   
-  const handleClick = (e) => {
-    e.preventDefault()
-    if (onArticleClick) {
-      onArticleClick(id)
-    }
-  }
-  
   return (
     <div className="flex flex-col gap-4">
-      <button 
-        onClick={handleClick}
-        className="relative h-[212px] sm:h-[360px] overflow-hidden rounded-md group w-full cursor-pointer"
+      <Link 
+        to={`/article/${id}`}
+        className="relative h-[212px] sm:h-[360px] overflow-hidden rounded-md group w-full cursor-pointer block"
       >
         <img 
           className="w-full h-full object-cover rounded-md transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:brightness-105" 
@@ -22,18 +17,18 @@ function BlogCard({ id, image, category, title, description, author, date, onArt
           alt={title}
         />
         <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-md"></div>
-      </button>
+      </Link>
       <div className="flex flex-col">
         <div className="flex">
           <span className="bg-green-200 rounded-full px-3 py-1 text-sm font-semibold text-green-600 mb-2">
             {category}
           </span>
         </div>
-        <button onClick={handleClick} className="text-start cursor-pointer">
+        <Link to={`/article/${id}`} className="text-start cursor-pointer">
           <h2 className="text-start font-bold text-xl mb-2 line-clamp-2 hover:underline">
             {title}
           </h2>
-        </button>
+        </Link>
         <p className="text-muted-foreground text-sm mb-4 grow line-clamp-3">
           {description}
         </p>
