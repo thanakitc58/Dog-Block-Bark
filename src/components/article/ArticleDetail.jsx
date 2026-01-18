@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
 import NavBar from '../NavBar/NavBar'
 import Footer from '../footer/footer'
 import AuthorBio from '../HeroSection/AuthorBio'
@@ -28,65 +29,74 @@ function ArticleDetail({ article, onBack }) {
           <img 
             src={article.image} 
             alt={article.title}
-            className="w-full h-[184px] lg:h-[60vh] lg:max-h-[500px] object-cover rounded-lg"
+            className="w-full h-[184px] lg:h-[60vh] lg:max-h-[500px] object-cover object-center rounded-lg"
           />
         </div>
 
         {/* Content Layout - Mobile: width 375px, top 232px, padding 24px top, 16px left/right, 40px bottom, gap 24px */}
-        <div className="w-full lg:w-full lg:mt-0 pt-0 lg:pt-0 pb-10 lg:pb-16 flex flex-col gap-6 lg:gap-4">
-          {/* Category and Date */}
-          <div className="flex items-center gap-4">
-            <span className="bg-green-200 rounded-full px-3 py-1 text-sm font-semibold text-green-600">
-              {article.category}
-            </span>
-            <span className="text-brown-400 text-sm">
-              {article.date}
-            </span>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-brown-600 font-bold text-3xl lg:text-4xl leading-tight">
-            {article.title}
-          </h1>
-
-          {/* Article Content */}
-          <div className="prose prose-lg max-w-none">
-            {/* Parse and render content */}
-            {article.content && (
-              <div className="text-brown-600 leading-relaxed flex flex-col gap-6">
-                {article.content.split('\n\n').map((paragraph, index) => {
-                  // Check if paragraph is a heading (starts with ##)
-                  if (paragraph.startsWith('## ')) {
-                    const headingText = paragraph.replace('## ', '')
-                    return (
-                      <h2 key={index} className="text-brown-600 font-bold text-2xl mt-0 lg:mt-8 mb-0 lg:mb-4">
-                        {headingText}
-                      </h2>
-                    )
-                  }
-                  // Regular paragraph
-                  return (
-                    <p key={index} className="mb-0 lg:mb-4 text-brown-600">
-                      {paragraph}
-                    </p>
-                  )
-                })}
+        {/* Desktop (lg+): Grid layout with main content on left and AuthorBio sidebar on right */}
+        <div className="w-full lg:w-full lg:mt-0 pt-0 lg:pt-0 pb-10 lg:pb-16">
+          {/* Grid Layout for lg+ screens: Category/Date + AuthorBio on same row */}
+          <div className="lg:grid lg:grid-cols-12 lg:gap-4 xl:gap-8 lg:items-start">
+            {/* Left Column - Main Content (9 columns - expanded) */}
+            <div className="lg:col-span-9">
+              {/* Category and Date */}
+              <div className="flex items-center gap-4 mb-4">
+                <span className="bg-green-200 rounded-full px-3 py-1 text-sm font-semibold text-green-600">
+                  {article.category}
+                </span>
+                <span className="text-brown-400 text-sm">
+                  {article.date}
+                </span>
               </div>
-            )}
-          </div>
 
-          {/* Author Bio Section */}
-          <AuthorBio />
+              {/* Title */}
+              <h1 className="text-brown-600 font-bold text-2xl lg:text-3xl leading-tight mb-3 lg:mb-4">
+                {article.title}
+              </h1>
+
+              {/* Introduction/Description */}
+              {article.description && (
+                <p className="text-brown-600 text-base lg:text-lg leading-normal mb-4 lg:mb-5">
+                  {article.description}
+                </p>
+              )}
+
+              {/* Article Content */}
+              <div className="prose prose-lg max-w-none">
+                {/* Render Markdown content using ReactMarkdown */}
+                {article.content && (
+                  <div className="text-brown-600 leading-normal">
+                    <ReactMarkdown
+                      components={{
+                        h2: ({ node, ...props }) => (
+                          <h2 className="text-brown-600 font-bold text-xl lg:text-2xl mt-0 lg:mt-5 mb-1 lg:mb-2 leading-tight" {...props} />
+                        ),
+                        p: ({ node, ...props }) => (
+                          <p className="mb-0 lg:mb-3 text-brown-600 text-base lg:text-base leading-normal" {...props} />
+                        ),
+                      }}
+                    >
+                      {article.content}
+                    </ReactMarkdown>
+                  </div>
+                )}
+              </div>
+
+              {/* Share Section - Like, Copy Link, Social Media */}
+              {/* Same width as content (col-span-9) for lg+ */}
+              <div className="mt-6 lg:mt-8">
+                <ShareSection initialLikes={article.likes || 0} />
+              </div>
+            </div>
+
+            {/* Right Column - Author Bio Sidebar (3 columns - reduced) - Same level as Category/Date */}
+            <div className="lg:col-span-3 lg:sticky lg:top-[120px] lg:self-start lg:h-fit mt-8 lg:mt-0">
+              <AuthorBio />
+            </div>
+          </div>
         </div>
       </article>
-
-      {/* Share Section - Like, Copy Link, Social Media */}
-      {/* Full width on mobile (< lg), contained on desktop */}
-      <div className="w-full mt-6 lg:mt-8">
-        <div className="w-full lg:px-[120px]">
-          <ShareSection initialLikes={article.likes || 0} />
-        </div>
-      </div>
 
       {/* Footer - Sticky for mobile */}
       <div className="lg:static mt-auto">

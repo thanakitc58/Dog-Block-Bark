@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import LoginModal from './LoginModal'
 
 /**
@@ -24,7 +25,6 @@ function ShareSection({ initialLikes = 0 }) {
   
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(initialLikes)
-  const [isCopied, setIsCopied] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
 
   const handleLike = () => {
@@ -57,27 +57,32 @@ function ShareSection({ initialLikes = 0 }) {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
+      toast.success('Copied!', {
+        description: 'This article has been copied to your clipboard.',
+        duration: 3000,
+      })
     } catch (err) {
       console.error('Failed to copy link:', err)
+      toast.error('Failed to copy link', {
+        description: 'Please try again.',
+        duration: 3000,
+      })
     }
   }
 
   const handleShare = (platform) => {
     const url = encodeURIComponent(window.location.href)
-    const title = encodeURIComponent(document.title)
     
     let shareUrl = ''
     switch (platform) {
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`
+        shareUrl = `https://www.facebook.com/share.php?u=${url}`
         break
       case 'linkedin':
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`
         break
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`
+        shareUrl = `https://www.twitter.com/share?&url=${url}`
         break
       default:
         return
@@ -87,34 +92,44 @@ function ShareSection({ initialLikes = 0 }) {
   }
 
   return (
-    <div className="w-full lg:max-w-full min-h-[152px] lg:min-h-auto bg-[#EFEEEB] rounded-none lg:rounded-lg p-4 lg:p-6 flex flex-col gap-6 lg:gap-6">
-      {/* Like Button */}
+    <div className="w-full lg:max-w-full bg-[#EFEEEB] rounded-none lg:rounded-lg p-4 lg:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-4">
+      {/* Like Button - Full width on mobile */}
       <button
         onClick={handleLike}
-        className={`w-full lg:max-w-[343px] h-12 flex items-center justify-center gap-3 rounded-full border transition-all duration-200 ${
+        className={`w-full lg:w-fit h-12 flex items-center justify-center gap-3 px-4 rounded-lg border transition-all duration-200 ${
           isLiked
-            ? 'bg-brown-100 border-brown-600 text-brown-600'
+            ? 'bg-brown-600 border-brown-600 text-white'
             : 'bg-white border-brown-300 text-brown-600 hover:bg-brown-50'
         }`}
         aria-label={isLiked ? 'Unlike' : 'Like'}
       >
-        {/* Smiley Icon */}
-        <span className="text-xl">{isLiked ? '😊' : '🙂'}</span>
+        {/* Smiley Icon - SVG with white fill for both mobile and desktop */}
+        <svg 
+          width="20" 
+          height="20" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          className={isLiked ? 'text-white' : 'text-brown-600'}
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill={isLiked ? 'white' : 'white'}/>
+          <circle cx="8" cy="9" r="1.5" fill={isLiked ? 'white' : 'currentColor'}/>
+          <circle cx="16" cy="9" r="1.5" fill={isLiked ? 'white' : 'currentColor'}/>
+          <path d="M8 14c0 2 2 4 4 4s4-2 4-4" stroke={isLiked ? 'white' : 'currentColor'} strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
         
         {/* Like Count */}
-        <span className="font-sans font-medium text-[16px] leading-[24px]">
+        <span className={`font-sans font-medium text-[16px] leading-[24px] ${isLiked ? 'text-white' : 'text-brown-600'}`}>
           {likesCount}
         </span>
       </button>
 
-      {/* Copy Link and Social Share */}
-      <div className="flex flex-row items-center gap-4 lg:gap-4">
+      {/* Copy Link and Social Media - Row layout on mobile */}
+      <div className="flex flex-row items-center gap-4 lg:gap-4 w-full lg:w-auto lg:ml-auto">
         {/* Copy Link Button */}
         <button
           onClick={handleCopyLink}
-          className={`flex-1 lg:max-w-[200px] h-12 flex items-center justify-center gap-3 px-4 rounded-lg border bg-white border-brown-300 text-brown-600 hover:bg-brown-50 transition-colors ${
-            isCopied ? 'bg-green-50 border-green-300' : ''
-          }`}
+          className="flex-1 lg:flex-none h-12 flex items-center justify-center gap-3 px-4 rounded-lg border bg-white border-brown-300 text-brown-600 hover:bg-brown-50 transition-colors"
           aria-label="Copy link"
         >
           {/* Copy Icon */}
@@ -132,7 +147,7 @@ function ShareSection({ initialLikes = 0 }) {
           </svg>
           
           <span className="font-sans font-medium text-[16px] leading-[24px] whitespace-nowrap">
-            {isCopied ? 'Copied!' : 'Copy link'}
+            Copy link
           </span>
         </button>
 

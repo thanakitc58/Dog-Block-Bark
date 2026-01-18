@@ -75,7 +75,7 @@ function SignUpForm() {
       newErrors.email = 'Email must be a valid email'
       isValid = false
     } else if (!formData.email.includes('@')) {
-      newErrors.email = 'Email must be a valid email'
+      newErrors.email = `โปรดใส่ "@" ในที่อยู่อีเมล "${formData.email}" ขาด "@"`
       isValid = false
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Email is already taken, Please try another email.'

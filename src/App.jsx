@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import './App.css'
 import HomePage from './pages/HomePage'
 import ArticleDetailPage from './pages/ArticleDetailPage'
@@ -34,6 +35,7 @@ function App() {
         {/* Catch all - redirect to home */}
         <Route path="*" element={<HomePage />} />
       </Routes>
+      <Toaster position="bottom-right" richColors />
     </Router>
   )
 }
