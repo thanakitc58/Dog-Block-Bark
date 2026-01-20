@@ -23,25 +23,28 @@ function LoginModal({ isOpen, onClose, onCreateAccount, onLogin }) {
       />
 
       {/* Modal */}
-      <div className="fixed top-[270px] left-1/2 -translate-x-1/2 lg:top-1/2 lg:-translate-y-1/2 w-[343px] lg:w-auto lg:max-w-[500px] min-h-[272px] lg:min-h-auto bg-[#F9F8F6] rounded-2xl pt-4 pr-4 pb-10 pl-4 lg:p-6 lg:pb-10 flex flex-col items-center justify-center gap-6 lg:gap-6 z-[20001]">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 w-6 h-6 flex items-center justify-center text-brown-600 hover:text-brown-800 transition-colors"
-          aria-label="Close"
-        >
-          <X size={20} />
-        </button>
+      <div className="fixed top-[270px] left-1/2 -translate-x-1/2 lg:top-1/2 lg:-translate-y-1/2 w-[343px] lg:w-[621px] lg:h-[352px] min-h-[272px] lg:min-h-[352px] bg-[#F9F8F6] rounded-2xl lg:rounded-[16px] pt-4 pr-4 pb-10 pl-4 lg:pt-4 lg:pr-6 lg:pb-10 lg:pl-6 flex flex-col items-center justify-center gap-6 lg:gap-6 z-[20001]">
+        {/* Close Button - Div 1 */}
+        <div className="absolute top-4 right-4 lg:top-4 lg:right-6 xl:top-4 xl:right-6">
+          <button
+            onClick={onClose}
+            className="w-6 h-6 flex items-center justify-center text-brown-600 hover:text-brown-800 transition-colors"
+            aria-label="Close"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-        {/* Content */}
-        <div className="w-[311px] lg:w-auto lg:max-w-full mx-auto h-[168px] lg:h-auto lg:min-h-auto flex flex-col items-center justify-center gap-4">
+        {/* Content - Div 2 */}
+        <div className="w-[311px] lg:w-[573px] lg:h-[248px] mx-auto flex flex-col items-center justify-center gap-6 lg:gap-10">
           {/* Title */}
-          <h2 className="font-poppins font-semibold text-[24px] leading-[32px] tracking-[0%] text-center text-brown-600">
-            Create an account to continue
+          <h2 className="font-poppins font-semibold text-[24px] lg:text-[40px] leading-[32px] lg:leading-[48px] tracking-[0%] text-center text-brown-600">
+            <span className="inline lg:block">Create an account</span>
+            <span className="inline lg:block lg:mt-0"> to continue</span>
           </h2>
 
           {/* Button and Link */}
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-6 lg:gap-6">
             {/* Create Account Button */}
             <button
               onClick={onCreateAccount}

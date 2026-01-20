@@ -1,15 +1,24 @@
 import React from 'react'
 import BlogCard from './BlogCard'
-import blogPosts from '../../data/blogPosts'
+import { useArticles } from '../../hooks/useArticles'
 
 function ArticleSection({ category, searchQuery }) {
-  // Filter blog posts based on selected category AND search query
-  const filteredPosts = blogPosts.filter((post) => {
-    // Category filter (case-insensitive)
-    const matchesCategory = category === "highlight" 
-      ? true 
-      : post.category.toLowerCase() === category.toLowerCase()
-    
+  const {
+    posts,
+    loading,
+    isLoadingMore,
+    error,
+    hasMore,
+    loadMore
+  } = useArticles(category, 6)
+
+  // ฟังก์ชันเพิ่มหน้า
+  const handleLoadMore = () => {
+    loadMore()
+  }
+
+  // Filter posts by search query (client-side filtering)
+  const filteredPosts = posts.filter((post) => {
     // Search filter (case-insensitive: ไม่สนใจตัวพิมพ์ใหญ่-เล็ก)
     // ค้นหาใน title และ description
     const matchesSearch = searchQuery === "" 
@@ -17,8 +26,34 @@ function ArticleSection({ category, searchQuery }) {
       : post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.description.toLowerCase().includes(searchQuery.toLowerCase())
     
-    return matchesCategory && matchesSearch
+    return matchesSearch
   })
+
+  // Loading state
+  if (loading) {
+    return (
+      <section className="w-full flex flex-col items-center py-8 px-4">
+        <div className="w-full max-w-[1200px] min-[1024px]:px-[120px] min-[1440px]:px-0">
+          <div className="text-center py-8">
+            <p className="text-brown-400">Loading</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section className="w-full flex flex-col items-center py-8 px-4">
+        <div className="w-full max-w-[1200px] min-[1024px]:px-[120px] min-[1440px]:px-0">
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="w-full flex flex-col items-center py-8 px-4">
@@ -38,11 +73,26 @@ function ArticleSection({ category, searchQuery }) {
               />
             ))
           ) : (
-            <div className="col-span-2 text-center py-8">
-              <p className="text-brown-400">No articles found.</p>
-            </div>
+            !loading && (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-brown-400">Posts not found.</p>
+              </div>
+            )
           )}
         </div>
+
+        {/* ปุ่ม "View More" - ซ่อนเมื่อไม่มีข้อมูลแล้ว */}
+        {hasMore && !loading && filteredPosts.length > 0 && (
+          <div className="text-center mt-8">
+            <button
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+              className="hover:text-muted-foreground font-medium underline disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoadingMore ? 'Loading...' : 'View more'}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )

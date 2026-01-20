@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import ArticleDetail from '../components/article/ArticleDetail'
-import blogPosts from '../data/blogPosts'
+import { useArticle } from '../hooks/useArticles'
+import { useScrollToTop } from '../hooks/useScrollToTop'
 
 /**
  * ArticleDetailPage Component
@@ -11,30 +12,41 @@ import blogPosts from '../data/blogPosts'
 function ArticleDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { article, loading, error } = useArticle(id)
 
-  // Find article by ID
-  const article = blogPosts.find(post => post.id === parseInt(id))
+  // Scroll to top when id changes
+  useScrollToTop(true, 'smooth', [id])
 
-  // Scroll to top when component mounts or id changes
+  // Redirect to home on error
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [id])
-
-  // Redirect to home if article not found
-  useEffect(() => {
-    if (!article) {
-      navigate('/')
+    if (error) {
+      setTimeout(() => {
+        navigate('/')
+      }, 2000)
     }
-  }, [article, navigate])
+  }, [error, navigate])
 
   // Handle back navigation
   const handleBack = () => {
     navigate('/')
   }
 
-  // Show nothing while redirecting
-  if (!article) {
-    return null
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+        <p className="text-brown-400">Loading article...</p>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !article) {
+    return (
+      <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+        <p className="text-red-500">{error || 'Article not found'}</p>
+      </div>
+    )
   }
 
   return (

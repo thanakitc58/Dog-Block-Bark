@@ -4,7 +4,7 @@ import { Linkedin, Github } from "lucide-react"
 function Footer() {
   return (
     <footer className="w-full bg-[#EFEEEB] lg:static">
-      <div className="w-full max-w-[1440px] h-[144px] mx-auto mt-[50px] px-4 pt-10 pb-6 lg:px-[120px] lg:py-[60px] flex flex-col items-center gap-4 lg:flex-row lg:justify-between lg:items-center">
+      <div className="w-full max-w-[1440px] h-[144px] mx-auto mt-[20px] lg:mt-0 px-4 pt-10 pb-6 lg:px-[120px] lg:py-[60px] flex flex-col items-center gap-4 lg:flex-row lg:justify-between lg:items-center">
         {/* Top Section - Get in touch and Social Icons */}
         <div className="flex flex-row items-center justify-center lg:justify-start gap-4">
           <p className="font-poppins font-medium text-[16px] leading-[24px] tracking-[0%] text-brown-500">
