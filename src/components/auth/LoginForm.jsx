@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from '../../hooks/useForm'
+import { useAuth } from '../../context/AuthContext'
 
 /**
  * LoginForm Component
@@ -8,6 +9,7 @@ import { useForm } from '../../hooks/useForm'
  */
 function LoginForm() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   
   const {
     formData,
@@ -34,6 +36,14 @@ function LoginForm() {
       // For now, redirect to success page when form is valid
       // In real app, this would be an API call first
       console.log('Log in:', formData)
+      
+      // Login user with email
+      const emailUsername = formData.email.split('@')[0] || 'user'
+      login({
+        name: emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1),
+        username: emailUsername,
+        email: formData.email
+      })
       
       // Navigate to success page
       navigate('/success')

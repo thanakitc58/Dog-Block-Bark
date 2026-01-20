@@ -1,11 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import './App.css'
+import { AuthProvider } from './context/AuthContext'
 import HomePage from './pages/HomePage'
 import ArticleDetailPage from './pages/ArticleDetailPage'
+import ProfilePage from './pages/ProfilePage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import SignUpPage from './pages/SignUpPage'
 import LoginPage from './pages/LoginPage'
 import RegistrationSuccessPage from './pages/RegistrationSuccessPage'
+import AdminLoginPage from './pages/admin/AdminLoginPage'
+import AdminDashboard from './pages/admin/AdminDashboard'
 
 /**
  * App Component
@@ -19,28 +24,43 @@ import RegistrationSuccessPage from './pages/RegistrationSuccessPage'
  */
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Home Page Route */}
-        <Route path="/" element={<HomePage />} />
-        
-        {/* Article Detail Page Route */}
-        <Route path="/article/:id" element={<ArticleDetailPage />} />
-        
-        {/* Sign Up Page Route */}
-        <Route path="/signup" element={<SignUpPage />} />
-        
-        {/* Login Page Route */}
-        <Route path="/login" element={<LoginPage />} />
-        
-        {/* Registration Success Page Route */}
-        <Route path="/success" element={<RegistrationSuccessPage />} />
-        
-        {/* Catch all - redirect to home */}
-        <Route path="*" element={<HomePage />} />
-      </Routes>
-      <Toaster position="bottom-right" richColors />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Home Page Route */}
+          <Route path="/" element={<HomePage />} />
+          
+          {/* Article List Page Route */}
+          <Route path="/article" element={<HomePage />} />
+          
+          {/* Article Detail Page Route */}
+          <Route path="/article/:id" element={<ArticleDetailPage />} />
+          
+          {/* Profile Page Route */}
+          <Route path="/profile" element={<ProfilePage />} />
+          
+          {/* Reset Password Page Route */}
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          
+          {/* Sign Up Page Route */}
+          <Route path="/signup" element={<SignUpPage />} />
+          
+          {/* Login Page Route */}
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* Registration Success Page Route */}
+          <Route path="/success" element={<RegistrationSuccessPage />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          
+          {/* Catch all - redirect to home */}
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+        <Toaster position="bottom-right" richColors />
+      </Router>
+    </AuthProvider>
   )
 }
 

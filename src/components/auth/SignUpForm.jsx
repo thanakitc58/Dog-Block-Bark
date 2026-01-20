@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from '../../hooks/useForm'
 import { emailRegex } from '../../hooks/useFormValidation'
+import { useAuth } from '../../context/AuthContext'
 
 /**
  * SignUpForm Component
@@ -8,6 +9,9 @@ import { emailRegex } from '../../hooks/useFormValidation'
  * Mobile-first design (375px)
  */
 function SignUpForm() {
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  
   const {
     formData,
     errors,
@@ -54,6 +58,16 @@ function SignUpForm() {
     onSubmit: (formData, { setFieldError }) => {
       // TODO: Handle signup logic with API call
       console.log('Sign up:', formData)
+      
+      // Login user with signup data
+      login({
+        name: formData.name,
+        username: formData.username,
+        email: formData.email
+      })
+      
+      // Navigate to success page
+      navigate('/success')
       
       // Example: Simulate signup failure (e.g., email already taken)
       // setFieldError('email', 'Email is already taken, Please try another email.')
