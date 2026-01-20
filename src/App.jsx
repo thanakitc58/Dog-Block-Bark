@@ -11,6 +11,8 @@ import LoginPage from './pages/LoginPage'
 import RegistrationSuccessPage from './pages/RegistrationSuccessPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminProfilePage from './pages/admin/AdminProfilePage'
+import AdminResetPasswordPage from './pages/admin/AdminResetPasswordPage'
 
 /**
  * App Component
@@ -54,6 +56,10 @@ function App() {
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/categories" element={<AdminDashboard />} />
+          <Route path="/admin/notifications" element={<AdminDashboard />} />
+          <Route path="/admin/profile" element={<AdminProfilePage />} />
+          <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
           
           {/* Catch all - redirect to home */}
           <Route path="*" element={<HomePage />} />

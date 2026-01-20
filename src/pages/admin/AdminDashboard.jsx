@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import AdminSidebar from '../../components/admin/AdminSidebar'
 import AdminHeader from '../../components/admin/AdminHeader'
 import ArticleManagement from '../../components/admin/ArticleManagement'
+import CategoryManagement from '../../components/admin/CategoryManagement'
+import NotificationManagement from '../../components/admin/NotificationManagement'
 import { useAuth } from '../../context/AuthContext'
 
 /**
@@ -11,6 +13,7 @@ import { useAuth } from '../../context/AuthContext'
  */
 function AdminDashboard() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
 
   useEffect(() => {
@@ -22,6 +25,27 @@ function AdminDashboard() {
       console.log('User is admin, showing dashboard', { user })
     }
   }, [user, navigate])
+
+  // Determine which component to show based on route
+  const getContentComponent = () => {
+    if (location.pathname === '/admin/categories') {
+      return <CategoryManagement />
+    }
+    if (location.pathname === '/admin/notifications') {
+      return <NotificationManagement />
+    }
+    return <ArticleManagement />
+  }
+
+  const getHeaderTitle = () => {
+    if (location.pathname === '/admin/categories') {
+      return 'Category management'
+    }
+    if (location.pathname === '/admin/notifications') {
+      return 'Notification'
+    }
+    return 'Article management'
+  }
 
   if (!user || !user.isAdmin) {
     return null
@@ -45,11 +69,11 @@ function AdminDashboard() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <AdminHeader title="Article management" />
+          <AdminHeader title={getHeaderTitle()} />
 
           {/* Content Area */}
           <div className="flex-1 overflow-auto">
-            <ArticleManagement />
+            {getContentComponent()}
           </div>
         </div>
       </div>
