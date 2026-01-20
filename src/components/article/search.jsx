@@ -11,48 +11,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import articlesAPI from '../../api/articles'
+import { useArticleSearch } from '../../hooks/useArticles'
 
 function Search({ category, onCategoryChange, searchQuery, onSearchChange }) {
-  const [suggestions, setSuggestions] = useState([])
+  const { suggestions, isSearching } = useArticleSearch(searchQuery, 300)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [isSearching, setIsSearching] = useState(false)
   const searchRef = useRef(null)
   const suggestionsRef = useRef(null)
   const navigate = useNavigate()
 
-  // Search articles when searchQuery changes
+  // Update showSuggestions when suggestions change
   useEffect(() => {
-    const searchArticles = async () => {
-      if (!searchQuery || searchQuery.trim() === '') {
-        setSuggestions([])
-        setShowSuggestions(false)
-        return
-      }
-
-      setIsSearching(true)
-      try {
-        const results = await articlesAPI.searchArticles(searchQuery)
-        setSuggestions(results)
-        setShowSuggestions(results.length > 0)
-        setSelectedIndex(-1)
-      } catch (error) {
-        console.error('Error searching:', error)
-        setSuggestions([])
-        setShowSuggestions(false)
-      } finally {
-        setIsSearching(false)
-      }
-    }
-
-    // Debounce search
-    const timeoutId = setTimeout(() => {
-      searchArticles()
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery])
+    setShowSuggestions(suggestions.length > 0)
+    setSelectedIndex(-1)
+  }, [suggestions])
 
   // Handle click outside to close suggestions
   useEffect(() => {

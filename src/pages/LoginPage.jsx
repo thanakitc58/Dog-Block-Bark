@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
 import NavBar from '../components/NavBar/NavBar'
 import LoginForm from '../components/auth/LoginForm'
+import { useScrollToTop } from '../hooks/useScrollToTop'
 
 /**
  * LoginPage Component
@@ -9,9 +9,7 @@ import LoginForm from '../components/auth/LoginForm'
  */
 function LoginPage() {
   // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
+  useScrollToTop()
 
   return (
     <div className="min-h-screen bg-[#F9F8F6]">

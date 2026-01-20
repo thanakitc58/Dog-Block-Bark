@@ -3,9 +3,9 @@ import mainImage from '../../assets/images/main.jpg'
 function AuthorBio() {
   return (
     <div className="w-full mt-5 lg:mt-0 flex justify-center lg:justify-start lg:items-start">
-      <div className="w-full max-w-[343px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-full min-h-[280px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-auto bg-[#EFEEEB] rounded-2xl p-4 sm:p-5 md:p-6 lg:p-6 xl:p-8 flex flex-col gap-3 sm:gap-4 md:gap-5 lg:gap-4 xl:gap-5">
-        {/* Profile Picture and Author Name Section - Horizontal Layout */}
-        <div className="flex flex-row items-start gap-3 sm:gap-4 md:gap-5 lg:gap-4 xl:gap-5">
+      <div className="w-full max-w-[343px] sm:max-w-[400px] md:max-w-[500px] lg:w-[305px] lg:h-[400px] min-h-[280px] sm:min-h-[320px] md:min-h-[350px] bg-[#EFEEEB] rounded-2xl lg:rounded-[16px] p-4 sm:p-5 md:p-6 lg:p-6 flex flex-col gap-3 sm:gap-4 md:gap-5 lg:gap-5">
+        {/* Profile Picture and Author Name Section - Horizontal Layout: gap 12px for 1440px */}
+        <div className="flex flex-row items-start gap-3 sm:gap-4 md:gap-5 lg:gap-3 xl:gap-5">
           {/* Profile Picture */}
           <div className="shrink-0">
             <img 

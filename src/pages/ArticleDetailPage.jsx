@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import ArticleDetail from '../components/article/ArticleDetail'
-import articlesAPI from '../api/articles'
-import { formatDate } from '../utils/dateFormatter'
+import { useArticle } from '../hooks/useArticles'
+import { useScrollToTop } from '../hooks/useScrollToTop'
 
 /**
  * ArticleDetailPage Component
@@ -12,47 +12,19 @@ import { formatDate } from '../utils/dateFormatter'
 function ArticleDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [article, setArticle] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { article, loading, error } = useArticle(id)
 
-  // Fetch article from API
+  // Scroll to top when id changes
+  useScrollToTop(true, 'smooth', [id])
+
+  // Redirect to home on error
   useEffect(() => {
-    const fetchArticle = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        
-        const fetchedArticle = await articlesAPI.getArticleById(id)
-        
-        // Format date from ISO 8601 to readable format
-        const formattedArticle = {
-          ...fetchedArticle,
-          date: formatDate(fetchedArticle.date)
-        }
-        
-        setArticle(formattedArticle)
-      } catch (err) {
-        console.error('Error fetching article:', err)
-        setError('Article not found')
-        // Redirect to home after a short delay
-        setTimeout(() => {
-          navigate('/')
-        }, 2000)
-      } finally {
-        setLoading(false)
-      }
+    if (error) {
+      setTimeout(() => {
+        navigate('/')
+      }, 2000)
     }
-
-    if (id) {
-      fetchArticle()
-    }
-  }, [id, navigate])
-
-  // Scroll to top when component mounts or id changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [id])
+  }, [error, navigate])
 
   // Handle back navigation
   const handleBack = () => {

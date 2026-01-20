@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useForm } from '../../hooks/useForm'
 
 /**
  * LoginForm Component
@@ -7,95 +7,38 @@ import { useState } from 'react'
  * Mobile-first design (375px)
  */
 function LoginForm() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
-  const [errors, setErrors] = useState({
-    email: '',
-    password: '',
-    general: ''
-  })
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value
-    })
-    // Clear error when user starts typing or when password is valid
-    if (errors[name]) {
-      // For password, clear error if length >= 6
-      if (name === 'password' && value.length >= 6) {
-        setErrors({
-          ...errors,
-          [name]: ''
-        })
-      } else if (name !== 'password') {
-        // For other fields, clear error when user starts typing
-        setErrors({
-          ...errors,
-          [name]: ''
-        })
-      }
-    }
-  }
-
-  // Email validation regex pattern
-  const emailRegex = /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/gim
-
-  const validateForm = () => {
-    const newErrors = {
+  const navigate = useNavigate()
+  
+  const {
+    formData,
+    errors,
+    handleChange,
+    handleSubmit
+  } = useForm({
+    initialValues: {
       email: '',
-      password: '',
-      general: ''
+      password: ''
+    },
+    validationRules: {
+      email: {
+        required: true,
+        message: 'Email must be a valid email'
+      },
+      password: {
+        required: true,
+        message: 'Password must be at least 6 characters'
+      }
+    },
+    onSubmit: (formData) => {
+      // TODO: Handle login logic with API call
+      // For now, redirect to success page when form is valid
+      // In real app, this would be an API call first
+      console.log('Log in:', formData)
+      
+      // Navigate to success page
+      navigate('/success')
     }
-    let isValid = true
-
-    // Email validation with custom regex
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email must be a valid email'
-      isValid = false
-    } else if (!formData.email.includes('@')) {
-      newErrors.email = `โปรดใส่ "@" ในที่อยู่อีเมล "${formData.email}" ขาด "@"`
-      isValid = false
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Email must be a valid email'
-      isValid = false
-    }
-
-    // Password validation - must be at least 6 characters
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password must be at least 6 characters'
-      isValid = false
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
-      isValid = false
-    }
-
-    setErrors(newErrors)
-    return isValid
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-
-    // TODO: Handle login logic with API call
-    // For now, simulate login failure for demonstration
-    // In real app, this would be an API call
-    console.log('Log in:', formData)
-    
-    // Example: Simulate login failure
-    // setErrors({
-    //   email: '',
-    //   password: '',
-    //   general: 'Invalid email or password'
-    // })
-  }
+  })
 
   return (
     <div className="w-full max-w-[375px] lg:max-w-[500px] bg-[#EFEEEB] rounded-2xl p-6 lg:p-8 flex flex-col gap-6">

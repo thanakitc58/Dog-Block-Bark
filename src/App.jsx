@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import ArticleDetailPage from './pages/ArticleDetailPage'
 import SignUpPage from './pages/SignUpPage'
 import LoginPage from './pages/LoginPage'
+import RegistrationSuccessPage from './pages/RegistrationSuccessPage'
 
 /**
  * App Component
@@ -31,6 +32,9 @@ function App() {
         
         {/* Login Page Route */}
         <Route path="/login" element={<LoginPage />} />
+        
+        {/* Registration Success Page Route */}
+        <Route path="/success" element={<RegistrationSuccessPage />} />
         
         {/* Catch all - redirect to home */}
         <Route path="*" element={<HomePage />} />

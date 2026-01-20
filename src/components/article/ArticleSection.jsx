@@ -1,77 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import BlogCard from './BlogCard'
-import articlesAPI from '../../api/articles'
-import { formatArticlesDates } from '../../utils/dateFormatter'
+import { useArticles } from '../../hooks/useArticles'
 
 function ArticleSection({ category, searchQuery }) {
-  const [posts, setPosts] = useState([])
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const [loading, setLoading] = useState(true)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [error, setError] = useState(null)
-  const isLoadingRef = useRef(false)
-
-  // ฟังก์ชันสำหรับโหลดข้อมูล
-  const fetchPosts = async () => {
-    // ป้องกันการโหลดซ้ำถ้ายังโหลดไม่เสร็จ
-    if (isLoadingRef.current) return
-
-    isLoadingRef.current = true
-    setIsLoadingMore(true)
-    try {
-      setError(null)
-      
-      // Fetch articles with pagination
-      const categoryParam = category === "highlight" ? null : category
-      const response = await articlesAPI.getArticles(categoryParam, page, 6)
-      
-      // Format dates from ISO 8601 to readable format
-      const formattedPosts = formatArticlesDates(response.posts)
-      
-      // ตรวจสอบว่ามีข้อมูลหรือไม่
-      if (!formattedPosts || formattedPosts.length === 0) {
-        setHasMore(false)
-        return
-      }
-      
-      // รวมโพสต์ใหม่กับโพสต์เดิม (append ไม่ใช่ replace)
-      setPosts((prevPosts) => [...prevPosts, ...formattedPosts])
-      
-      // ตรวจสอบว่าถึงหน้าสุดท้ายหรือยัง
-      if (response.currentPage >= response.totalPages || formattedPosts.length < 6) {
-        setHasMore(false)
-      }
-    } catch (err) {
-      console.error('Error fetching articles:', err)
-      setError('Failed to load articles')
-    } finally {
-      isLoadingRef.current = false
-      setIsLoadingMore(false)
-      setLoading(false)
-    }
-  }
-
-  // รีเซ็ตโพสต์เมื่อเปลี่ยน category
-  useEffect(() => {
-    setPosts([])
-    setPage(1)
-    setHasMore(true)
-    setLoading(true)
-    isLoadingRef.current = false
-  }, [category])
-
-  // โหลดโพสต์ใหม่เมื่อ page หรือ category เปลี่ยน
-  useEffect(() => {
-    fetchPosts()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, category]) // Re-fetch when page or category changes
+  const {
+    posts,
+    loading,
+    isLoadingMore,
+    error,
+    hasMore,
+    loadMore
+  } = useArticles(category, 6)
 
   // ฟังก์ชันเพิ่มหน้า
   const handleLoadMore = () => {
-    if (!isLoadingMore && hasMore) {
-      setPage((prevPage) => prevPage + 1)
-    }
+    loadMore()
   }
 
   // Filter posts by search query (client-side filtering)

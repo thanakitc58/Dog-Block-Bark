@@ -2,7 +2,7 @@ import mainImage from '../../assets/images/main.jpg'
 
 function HeroSection() {
   return (
-    <section className="w-full min-h-full lg:min-h-[529px] mx-auto pt-[68px] lg:pt-[130px] pb-10 px-4 lg:px-[120px] bg-[#F9F8F6] flex flex-col lg:flex-row items-center lg:items-start justify-center lg:gap-[60px] gap-10">
+    <section className="w-full min-h-full lg:min-h-[529px] mx-auto pt-[68px] lg:pt-[50px] pb-10 px-4 lg:px-[120px] bg-[#F9F8F6] flex flex-col lg:flex-row items-center lg:items-start justify-center lg:gap-[60px] gap-10">
       {/* Div 1 - Title Section */}
       <div className="w-full lg:w-[347px] h-auto lg:h-[276px] opacity-100 flex flex-col gap-6 lg:gap-6 lg:pt-0 xl:mt-[126px]">
         {/* Title */}

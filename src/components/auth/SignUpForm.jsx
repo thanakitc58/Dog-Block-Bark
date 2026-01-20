@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useForm } from '../../hooks/useForm'
+import { emailRegex } from '../../hooks/useFormValidation'
 
 /**
  * SignUpForm Component
@@ -7,113 +8,57 @@ import { useState } from 'react'
  * Mobile-first design (375px)
  */
 function SignUpForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: ''
-  })
-  const [errors, setErrors] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    general: ''
-  })
-
-  // Email validation regex pattern
-  const emailRegex = /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/gim
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value
-    })
-    // Clear error when user starts typing or when password is valid
-    if (errors[name]) {
-      // For password, clear error if length >= 6
-      if (name === 'password' && value.length >= 6) {
-        setErrors({
-          ...errors,
-          [name]: ''
-        })
-      } else if (name !== 'password') {
-        // For other fields, clear error when user starts typing
-        setErrors({
-          ...errors,
-          [name]: ''
-        })
-      }
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors = {
+  const {
+    formData,
+    errors,
+    handleChange,
+    handleSubmit,
+    setFieldError
+  } = useForm({
+    initialValues: {
       name: '',
       username: '',
       email: '',
-      password: '',
-      general: ''
+      password: ''
+    },
+    validationRules: {
+      name: {
+        required: true,
+        message: 'Name is required'
+      },
+      username: {
+        required: true,
+        message: 'Username is required'
+      },
+      email: {
+        required: true,
+        message: 'Email must be a valid email',
+        validator: (value) => {
+          if (!value.trim()) {
+            return 'Email must be a valid email'
+          }
+          if (!value.includes('@')) {
+            return `โปรดใส่ "@" ในที่อยู่อีเมล "${value}" ขาด "@"`
+          }
+          if (!emailRegex.test(value)) {
+            return 'Email is already taken, Please try another email.'
+          }
+          return ''
+        }
+      },
+      password: {
+        required: true,
+        message: 'Password must be at least 6 characters'
+      }
+    },
+    onSubmit: (formData, { setFieldError }) => {
+      // TODO: Handle signup logic with API call
+      console.log('Sign up:', formData)
+      
+      // Example: Simulate signup failure (e.g., email already taken)
+      // setFieldError('email', 'Email is already taken, Please try another email.')
     }
-    let isValid = true
-
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required'
-      isValid = false
-    }
-
-    // Username validation
-    if (!formData.username.trim()) {
-      newErrors.username = 'Username is required'
-      isValid = false
-    }
-
-    // Email validation with custom regex
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email must be a valid email'
-      isValid = false
-    } else if (!formData.email.includes('@')) {
-      newErrors.email = `โปรดใส่ "@" ในที่อยู่อีเมล "${formData.email}" ขาด "@"`
-      isValid = false
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Email is already taken, Please try another email.'
-      isValid = false
-    }
-
-    // Password validation - must be at least 6 characters
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password must be at least 6 characters'
-      isValid = false
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
-      isValid = false
-    }
-
-    setErrors(newErrors)
-    return isValid
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-
-    // TODO: Handle signup logic with API call
-    console.log('Sign up:', formData)
-    
-    // Example: Simulate signup failure (e.g., email already taken)
-    // setErrors({
-    //   name: '',
-    //   username: '',
-    //   email: 'Email is already taken, Please try another email.',
-    //   password: '',
-    //   general: ''
-    // })
-  }
+  })
 
   return (
     <div className="w-full max-w-[375px] lg:max-w-[500px] bg-[#EFEEEB] rounded-2xl p-6 lg:p-8 flex flex-col gap-6">
