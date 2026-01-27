@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import AdminSidebar from '../../components/admin/AdminSidebar'
 import AdminHeader from '../../components/admin/AdminHeader'
 import { useAuth } from '../../context/AuthContext'
@@ -18,6 +19,11 @@ function AdminResetPasswordPage() {
   })
   const [errors, setErrors] = useState({})
   const [isResetting, setIsResetting] = useState(false)
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  })
 
   useEffect(() => {
     // Check if user is admin
@@ -154,19 +160,33 @@ function AdminResetPasswordPage() {
                   <label htmlFor="current-password" className="font-sans text-sm font-medium text-brown-600">
                     Current password
                   </label>
-                  <input
-                    type="password"
-                    id="current-password"
-                    name="currentPassword"
-                    value={formData.currentPassword}
-                    onChange={handleChange}
-                    className={`w-full h-12 px-4 rounded-lg border bg-white text-brown-600 font-sans text-base leading-6 placeholder-brown-400 focus:outline-none focus:ring-2 ${
-                      errors.currentPassword
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                        : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
-                    }`}
-                    placeholder="Current password"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPasswords.current ? 'text' : 'password'}
+                      id="current-password"
+                      name="currentPassword"
+                      value={formData.currentPassword}
+                      onChange={handleChange}
+                      className={`w-full h-12 px-4 pr-12 rounded-lg border bg-white text-brown-600 font-sans text-base leading-6 placeholder-brown-400 focus:outline-none focus:ring-2 ${
+                        errors.currentPassword
+                          ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                          : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
+                      }`}
+                      placeholder="Current password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-400 hover:text-brown-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brown-600 rounded p-1"
+                      aria-label={showPasswords.current ? 'Hide password' : 'Show password'}
+                    >
+                      {showPasswords.current ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </div>
                   {errors.currentPassword && (
                     <p className="font-sans text-sm leading-5 text-red-600">
                       {errors.currentPassword}
@@ -179,19 +199,33 @@ function AdminResetPasswordPage() {
                   <label htmlFor="new-password" className="font-sans text-sm font-medium text-brown-600">
                     New password
                   </label>
-                  <input
-                    type="password"
-                    id="new-password"
-                    name="newPassword"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                    className={`w-full h-12 px-4 rounded-lg border bg-white text-brown-600 font-sans text-base leading-6 placeholder-brown-400 focus:outline-none focus:ring-2 ${
-                      errors.newPassword
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                        : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
-                    }`}
-                    placeholder="New password"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPasswords.new ? 'text' : 'password'}
+                      id="new-password"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      onChange={handleChange}
+                      className={`w-full h-12 px-4 pr-12 rounded-lg border bg-white text-brown-600 font-sans text-base leading-6 placeholder-brown-400 focus:outline-none focus:ring-2 ${
+                        errors.newPassword
+                          ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                          : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
+                      }`}
+                      placeholder="New password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-400 hover:text-brown-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brown-600 rounded p-1"
+                      aria-label={showPasswords.new ? 'Hide password' : 'Show password'}
+                    >
+                      {showPasswords.new ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </div>
                   {errors.newPassword && (
                     <p className="font-sans text-sm leading-5 text-red-600">
                       {errors.newPassword}
@@ -204,19 +238,33 @@ function AdminResetPasswordPage() {
                   <label htmlFor="confirm-password" className="font-sans text-sm font-medium text-brown-600">
                     Confirm new password
                   </label>
-                  <input
-                    type="password"
-                    id="confirm-password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className={`w-full h-12 px-4 rounded-lg border bg-white text-brown-600 font-sans text-base leading-6 placeholder-brown-400 focus:outline-none focus:ring-2 ${
-                      errors.confirmPassword
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                        : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
-                    }`}
-                    placeholder="Confirm new password"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPasswords.confirm ? 'text' : 'password'}
+                      id="confirm-password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className={`w-full h-12 px-4 pr-12 rounded-lg border bg-white text-brown-600 font-sans text-base leading-6 placeholder-brown-400 focus:outline-none focus:ring-2 ${
+                        errors.confirmPassword
+                          ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                          : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
+                      }`}
+                      placeholder="Confirm new password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-400 hover:text-brown-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brown-600 rounded p-1"
+                      aria-label={showPasswords.confirm ? 'Hide password' : 'Show password'}
+                    >
+                      {showPasswords.confirm ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </div>
                   {errors.confirmPassword && (
                     <p className="font-sans text-sm leading-5 text-red-600">
                       {errors.confirmPassword}
