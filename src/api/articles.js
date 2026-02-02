@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = 'https://blog-post-project-api.vercel.app'
+const BASE_URL = 'https://personal-block-server.vercel.app'
 
 /**
  * API service for articles
