@@ -12,15 +12,18 @@ import { useAuth } from '../../context/AuthContext'
  */
 function SignUpForm() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { register } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const {
     formData,
     errors,
     handleChange,
     handleSubmit,
-    setFieldError
+    setFieldError,
+    setGeneralError
   } = useForm({
     initialValues: {
       name: '',
@@ -58,22 +61,43 @@ function SignUpForm() {
         message: 'Password must be at least 6 characters'
       }
     },
-    onSubmit: (formData, { setFieldError }) => {
-      // TODO: Handle signup logic with API call
-      console.log('Sign up:', formData)
+    onSubmit: async (formData, { setFieldError, setGeneralError }) => {
+      // Prevent duplicate submissions
+      if (isSubmitting || isLoading) {
+        return
+      }
+
+      setIsSubmitting(true)
+      setIsLoading(true)
+      setGeneralError(null)
       
-      // Login user with signup data
-      login({
-        name: formData.name,
-        username: formData.username,
-        email: formData.email
-      })
-      
-      // Navigate to success page
-      navigate('/success')
-      
-      // Example: Simulate signup failure (e.g., email already taken)
-      // setFieldError('email', 'Email is already taken, Please try another email.')
+      try {
+        const result = await register({
+          email: formData.email,
+          password: formData.password,
+          username: formData.username,
+          name: formData.name,
+        })
+
+        if (result.success) {
+          // Navigate to success page
+          navigate('/success')
+        } else {
+          // Handle specific errors
+          if (result.error.includes('username')) {
+            setFieldError('username', result.error)
+          } else if (result.error.includes('email')) {
+            setFieldError('email', result.error)
+          } else {
+            setGeneralError(result.error)
+          }
+        }
+      } catch (error) {
+        setGeneralError('An unexpected error occurred. Please try again.')
+      } finally {
+        setIsLoading(false)
+        setIsSubmitting(false)
+      }
     }
   })
 
@@ -212,9 +236,10 @@ function SignUpForm() {
         {/* Sign Up Button */}
         <button
           type="submit"
-          className="w-auto px-8 h-12 bg-brown-600 text-white font-poppins font-medium text-[16px] leading-[24px] tracking-[0%] rounded-full hover:bg-brown-500 transition-colors mx-auto"
+          disabled={isLoading}
+          className="w-auto px-8 h-12 bg-brown-600 text-white font-poppins font-medium text-[16px] leading-[24px] tracking-[0%] rounded-full hover:bg-brown-500 transition-colors mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Sign up
+          {isLoading ? 'Signing up...' : 'Sign up'}
         </button>
 
         {/* Login Link */}
