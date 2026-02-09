@@ -2,8 +2,10 @@ import { useState } from 'react'
 
 /**
  * Email validation regex pattern
+ * NOTE: Do NOT use global flag here because it makes `.test` stateful
+ * and causes valid emails to randomly fail on subsequent validations.
  */
-export const emailRegex = /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/gim
+export const emailRegex = /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/im
 
 /**
  * Custom hook for form validation
@@ -54,10 +56,21 @@ export function useFormValidation(initialValues = {}, validationRules = {}) {
    */
   const handleChange = (e) => {
     const { name, value } = e.target
+
     setFormData({
       ...formData,
       [name]: value
     })
+
+    // Live validation for email field
+    if (name === 'email') {
+      const emailError = validateEmail(value)
+      setErrors((prev) => ({
+        ...prev,
+        email: emailError
+      }))
+      return
+    }
     
     // Clear error when user starts typing or when password is valid
     if (errors[name]) {

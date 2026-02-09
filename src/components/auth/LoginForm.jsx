@@ -13,12 +13,15 @@ function LoginForm() {
   const navigate = useNavigate()
   const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const {
     formData,
     errors,
     handleChange,
-    handleSubmit
+    handleSubmit,
+    setGeneralError
   } = useForm({
     initialValues: {
       email: '',
@@ -34,22 +37,35 @@ function LoginForm() {
         message: 'Password must be at least 6 characters'
       }
     },
-    onSubmit: (formData) => {
-      // TODO: Handle login logic with API call
-      // For now, redirect to success page when form is valid
-      // In real app, this would be an API call first
-      console.log('Log in:', formData)
+    onSubmit: async (formData, { setGeneralError }) => {
+      // Prevent duplicate submissions
+      if (isSubmitting || isLoading) {
+        return
+      }
+
+      setIsSubmitting(true)
+      setIsLoading(true)
+      setGeneralError(null)
       
-      // Login user with email
-      const emailUsername = formData.email.split('@')[0] || 'user'
-      login({
-        name: emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1),
-        username: emailUsername,
-        email: formData.email
-      })
-      
-      // Navigate to success page
-      navigate('/success')
+      try {
+        const result = await login({
+          email: formData.email,
+          password: formData.password,
+        })
+
+        if (result.success) {
+          // Navigate to home page or success page
+          navigate('/')
+        } else {
+          // Handle login errors
+          setGeneralError(result.error || 'Login failed. Please try again.')
+        }
+      } catch (error) {
+        setGeneralError('An unexpected error occurred. Please try again.')
+      } finally {
+        setIsLoading(false)
+        setIsSubmitting(false)
+      }
     }
   })
 
@@ -138,9 +154,10 @@ function LoginForm() {
         {/* Log In Button */}
         <button
           type="submit"
-          className="w-auto px-8 h-12 bg-brown-600 text-white font-poppins font-medium text-[16px] leading-[24px] tracking-[0%] rounded-full hover:bg-brown-500 transition-colors mx-auto"
+          disabled={isLoading}
+          className="w-auto px-8 h-12 bg-brown-600 text-white font-poppins font-medium text-[16px] leading-[24px] tracking-[0%] rounded-full hover:bg-brown-500 transition-colors mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Log in
+          {isLoading ? 'Logging in...' : 'Log in'}
         </button>
 
         {/* Sign Up Link */}

@@ -51,8 +51,22 @@ export function useArticles(category = null, limit = 6) {
           return
         }
         
-        // Append new posts to existing posts
-        setPosts((prevPosts) => [...prevPosts, ...formattedPosts])
+        // Remove duplicates within the new posts array itself
+        const seenIds = new Set()
+        const uniqueFormattedPosts = formattedPosts.filter(post => {
+          if (seenIds.has(post.id)) {
+            return false
+          }
+          seenIds.add(post.id)
+          return true
+        })
+        
+        // Append new posts to existing posts, filtering out duplicates by id
+        setPosts((prevPosts) => {
+          const existingIds = new Set(prevPosts.map(post => post.id))
+          const uniqueNewPosts = uniqueFormattedPosts.filter(post => !existingIds.has(post.id))
+          return [...prevPosts, ...uniqueNewPosts]
+        })
         
         // Check if reached last page
         if (response.currentPage >= response.totalPages || formattedPosts.length < limit) {
