@@ -13,7 +13,7 @@ import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProfilePage from './pages/admin/AdminProfilePage'
 import AdminResetPasswordPage from './pages/admin/AdminResetPasswordPage'
-
+import HealthTestPage from './pages/HealthTestPage'
 /**
  * App Component
  * Main application component with routing setup
@@ -60,7 +60,7 @@ function App() {
           <Route path="/admin/notifications" element={<AdminDashboard />} />
           <Route path="/admin/profile" element={<AdminProfilePage />} />
           <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
-          
+          <Route path="/test-health" element={<HealthTestPage />} />
           {/* Catch all - redirect to home */}
           <Route path="*" element={<HomePage />} />
         </Routes>
