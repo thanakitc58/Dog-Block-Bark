@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import NavBar from '../components/NavBar/NavBar'
 import { useScrollToTop } from '../hooks/useScrollToTop'
+import { useAuth } from '../context/AuthContext'
 
 /**
  * RegistrationSuccessPage Component
@@ -9,12 +10,19 @@ import { useScrollToTop } from '../hooks/useScrollToTop'
  */
 function RegistrationSuccessPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   // Scroll to top when component mounts
   useScrollToTop()
 
   const handleContinue = () => {
-    // Navigate to home page
+    // Login user and navigate to home page
+    // In real app, this would get user data from API response
+    login({
+      name: 'User',
+      username: 'user',
+      email: 'user@example.com'
+    })
     navigate('/')
   }
 

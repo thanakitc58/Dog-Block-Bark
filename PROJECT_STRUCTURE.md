@@ -151,3 +151,35 @@ src/types/
 12. Notifications
 13. Polish & Testing
 
+---
+
+## 📐 โครงสร้างตาม Clean Code (Health Test ตัวอย่าง)
+
+**หลักการ: High Cohesion, Low Coupling, Separation of Concerns**
+
+```
+src/
+├── api/                    # Layer: การเรียก API (ไม่มี UI/state)
+│   ├── articles.js
+│   └── health.js           # Health / test endpoints
+├── hooks/                  # Custom Hooks: logic + state
+│   ├── index.js
+│   ├── useHealthTest.js    # state (result, error, loading) + testHealth, reset
+│   └── ...
+├── components/
+│   └── healthTest/         # Presentational components (รับ props อย่างเดียว)
+│       ├── index.js
+│       └── HealthTestPanel.jsx
+├── pages/
+│   └── HealthTestPage.jsx  # Container: ใช้ hook + ส่ง props ลง Panel
+└── context/                # Global state (ใช้เมื่อจำเป็น ไม่ prop drill)
+    ├── AuthContext.jsx
+    └── ArticleContext.jsx
+```
+
+- **API**: รับผิดชอบเฉพาะ HTTP request/response
+- **Hooks**: จัดการ state + logic, คืนค่าให้ Page/Container ใช้
+- **Components**: แสดงผลจาก props เท่านั้น (ไม่เรียก API เอง)
+- **Pages**: รวม hook กับ components ไม่เก็บ business logic ในตัว
+- **Context**: ใช้เมื่อมี state ที่หลายระดับของ component ต้องใช้ร่วมกัน
+

@@ -1,0 +1,6 @@
+/**
+ * API Base URL – ใช้ที่เดียวทั้งโปรเจกต์
+ * อ่านจาก .env (VITE_API_BASE_URL) หรือใช้ default
+ */
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'https://personal-block-server.vercel.app'

@@ -1,6 +1,9 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { useForm } from '../../hooks/useForm'
 import { emailRegex } from '../../hooks/useFormValidation'
+import { useAuth } from '../../context/AuthContext'
 
 /**
  * SignUpForm Component
@@ -8,6 +11,10 @@ import { emailRegex } from '../../hooks/useFormValidation'
  * Mobile-first design (375px)
  */
 function SignUpForm() {
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
+  
   const {
     formData,
     errors,
@@ -54,6 +61,16 @@ function SignUpForm() {
     onSubmit: (formData, { setFieldError }) => {
       // TODO: Handle signup logic with API call
       console.log('Sign up:', formData)
+      
+      // Login user with signup data
+      login({
+        name: formData.name,
+        username: formData.username,
+        email: formData.email
+      })
+      
+      // Navigate to success page
+      navigate('/success')
       
       // Example: Simulate signup failure (e.g., email already taken)
       // setFieldError('email', 'Email is already taken, Please try another email.')
@@ -158,19 +175,33 @@ function SignUpForm() {
           <label htmlFor="password" className="font-poppins font-medium text-[16px] leading-[24px] text-brown-600">
             Password
           </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`w-full h-12 px-4 rounded-lg border bg-white text-brown-600 font-poppins text-[16px] leading-[24px] placeholder-brown-400 focus:outline-none focus:ring-2 ${
-              errors.password
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
-            }`}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full h-12 px-4 pr-12 rounded-lg border bg-white text-brown-600 font-poppins text-[16px] leading-[24px] placeholder-brown-400 focus:outline-none focus:ring-2 ${
+                errors.password
+                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                  : 'border-brown-300 focus:ring-brown-600 focus:border-transparent'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-400 hover:text-brown-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brown-600 rounded p-1"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? (
+                <EyeOff size={20} />
+              ) : (
+                <Eye size={20} />
+              )}
+            </button>
+          </div>
           {errors.password && (
             <p className="font-poppins text-[14px] leading-[20px] text-red-600">
               {errors.password}
