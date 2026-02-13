@@ -11,7 +11,8 @@ import { Upload } from 'lucide-react'
  */
 function AdminProfilePage() {
   const navigate = useNavigate()
-  const { user, login } = useAuth()
+  const { user, login, isAuthenticated } = useAuth()
+  const isAdmin = user?.role && user.role.toLowerCase() === 'admin'
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -21,19 +22,31 @@ function AdminProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    // Check if user is admin
-    if (!user || !user.isAdmin) {
-      navigate('/admin/login')
-    } else {
-      // Load user data
-      setFormData({
-        name: user.name || 'Thompson P.',
-        username: user.username || 'thompson',
-        email: user.email || 'thompson.p@gmail.com',
-        bio: user.bio || 'I am a pet enthusiast and freelance writer who specializes in animal behavior and care. With a deep love for cats, I enjoy sharing insights on feline companionship and wellness. When I\'m not writing, I spends time volunteering at my local animal shelter, helping cats find loving homes.'
-      })
+    // ยังไม่รู้สถานะ auth → ยังไม่ redirect
+    if (!isAuthenticated) {
+      return
     }
-  }, [user, navigate])
+
+    // ถ้าไม่ล็อกอิน → ไปหน้า login ปกติ
+    if (!user) {
+      navigate('/login')
+      return
+    }
+
+    // ถ้าไม่ใช่ admin → กลับหน้าแรก
+    if (!isAdmin) {
+      navigate('/')
+      return
+    }
+
+    // Load user data สำหรับ admin
+    setFormData({
+      name: user.name || 'Thompson P.',
+      username: user.username || 'thompson',
+      email: user.email || 'thompson.p@gmail.com',
+      bio: user.bio || 'I am a pet enthusiast and freelance writer who specializes in animal behavior and care. With a deep love for cats, I enjoy sharing insights on feline companionship and wellness. When I\'m not writing, I spends time volunteering at my local animal shelter, helping cats find loving homes.'
+    })
+  }, [user, isAdmin, isAuthenticated, navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -75,7 +88,7 @@ function AdminProfilePage() {
     // TODO: Implement file upload
   }
 
-  if (!user || !user.isAdmin) {
+  if (!user || !isAdmin) {
     return null
   }
 

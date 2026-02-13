@@ -6,7 +6,7 @@ import ArticleManagement from '../../components/admin/ArticleManagement'
 import CategoryManagement from '../../components/admin/CategoryManagement'
 import NotificationManagement from '../../components/admin/NotificationManagement'
 import { useAuth } from '../../context/AuthContext'
-
+     
 /**
  * AdminDashboard Component
  * Main admin dashboard page
@@ -14,17 +14,31 @@ import { useAuth } from '../../context/AuthContext'
 function AdminDashboard() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
+  const isAdmin = user?.role && user.role.toLowerCase() === 'admin'
 
   useEffect(() => {
-    // Check if user is admin
-    if (!user || !user.isAdmin) {
-      console.log('User not admin, redirecting to login', { user })
-      navigate('/admin/login')
-    } else {
-      console.log('User is admin, showing dashboard', { user })
+    // ยังไม่รู้สถานะ auth (กำลังเช็ก token อยู่) → อย่าเพิ่ง redirect
+    if (!isAuthenticated) {
+      return
     }
-  }, [user, navigate])
+
+    // เช็กแล้วว่าไม่ล็อกอิน → ไปหน้า login ปกติ
+    if (!user) {
+      console.log('No user, redirecting to login', { user })
+      navigate('/login')
+      return
+    }
+
+    // ถ้าเช็กแล้วว่าไม่ใช่ admin → กลับหน้าแรก
+    if (!isAdmin) {
+      console.log('User is not admin, redirecting to home', { user })
+      navigate('/')
+      return
+    }
+
+    console.log('User is admin, showing dashboard', { user })
+  }, [user, isAdmin, isAuthenticated, navigate])
 
   // Determine which component to show based on route
   const getContentComponent = () => {
@@ -47,7 +61,7 @@ function AdminDashboard() {
     return 'Article management'
   }
 
-  if (!user || !user.isAdmin) {
+  if (!user || !isAdmin) {
     return null
   }
 

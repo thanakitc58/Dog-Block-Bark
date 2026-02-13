@@ -6,57 +6,60 @@ import { useScrollToTop } from '../../hooks/useScrollToTop'
 
 /**
  * AdminLoginPage Component
- * Admin login page with username and password
+ * Admin login page using Supabase-authenticated admin user (role = 'admin')
  */
 function AdminLoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   })
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useScrollToTop()
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value
-    })
+    }))
     setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Trim whitespace and check admin credentials
-    const username = formData.username.trim().toLowerCase()
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    setError('')
+
+    const email = formData.email.trim().toLowerCase()
     const password = formData.password.trim()
 
-    console.log('Login attempt:', { username, password })
+    try {
+      const result = await login({ email, password })
 
-    // Check admin credentials (case-insensitive for username)
-    if (username === 'admin' && password === 'admin') {
-      console.log('Admin credentials valid, logging in...')
-      
-      // Set admin flag in user data
-      login({
-        name: 'Admin',
-        username: 'admin',
-        email: 'admin@example.com',
-        isAdmin: true
-      })
-      
-      console.log('Login successful, navigating to dashboard...')
-      
-      // Navigate to admin dashboard
+      if (!result.success) {
+        setError(result.error || 'Login failed. Please try again.')
+        return
+      }
+
+      // ต้องเป็น user ที่ role = 'admin' เท่านั้น (ไม่สนตัวพิมพ์เล็ก/ใหญ่)
+      const role = result.user?.role
+      if (!role || role.toLowerCase() !== 'admin') {
+        setError('You do not have admin access.')
+        return
+      }
+
       navigate('/admin/dashboard')
-    } else {
-      console.log('Invalid credentials')
-      setError('Invalid username or password. Please use: username = "admin", password = "admin"')
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -69,24 +72,24 @@ function AdminLoginPage() {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-brown-600 mb-2">
-              Username <span className="text-xs text-gray-500">(use: admin)</span>
+            <label htmlFor="email" className="block text-sm font-medium text-brown-600 mb-2">
+              Admin Email
             </label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               className="w-full h-12 px-4 rounded-lg border border-brown-300 bg-white text-brown-600 focus:outline-none focus:ring-2 focus:ring-brown-600 focus:border-transparent"
-              placeholder="Enter username (admin)"
+              placeholder="Enter admin email"
               required
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-brown-600 mb-2">
-              Password <span className="text-xs text-gray-500">(use: admin)</span>
+              Password
             </label>
             <div className="relative">
               <input
@@ -96,7 +99,7 @@ function AdminLoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full h-12 px-4 pr-12 rounded-lg border border-brown-300 bg-white text-brown-600 focus:outline-none focus:ring-2 focus:ring-brown-600 focus:border-transparent"
-                placeholder="Enter password (admin)"
+                placeholder="Enter password"
                 required
               />
               <button
@@ -120,9 +123,10 @@ function AdminLoginPage() {
 
           <button
             type="submit"
-            className="w-full h-12 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-colors"
+            disabled={isSubmitting}
+            className="w-full h-12 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Login
+            {isSubmitting ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>

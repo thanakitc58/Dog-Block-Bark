@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import NavBar from '../components/NavBar/NavBar'
 import Footer from '../components/footer/footer'
 import { useAuth } from '../context/AuthContext'
@@ -7,6 +8,7 @@ import { useScrollToTop } from '../hooks/useScrollToTop'
 import { useNotification } from '../hooks/useNotification'
 import SuccessNotification from '../components/profile/SuccessNotification'
 import { User, RotateCcw } from 'lucide-react'
+import { API_BASE_URL } from '../constants/api'
 
 /**
  * ProfilePage Component
@@ -14,7 +16,7 @@ import { User, RotateCcw } from 'lucide-react'
  */
 function ProfilePage() {
   const navigate = useNavigate()
-  const { user, login } = useAuth()
+  const { user, updateUser } = useAuth()
   const [activeTab, setActiveTab] = useState('profile')
   const [formData, setFormData] = useState({
     name: '',
@@ -22,7 +24,13 @@ function ProfilePage() {
     email: ''
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [imageFile, setImageFile] = useState(null)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const fileInputRef = useRef(null)
   const { notification, showNotification, hideNotification } = useNotification()
+
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5MB
 
   useScrollToTop()
 
@@ -57,21 +65,24 @@ function ProfilePage() {
     setIsSaving(true)
 
     try {
-      // TODO: Call API to save profile
-      // For now, update local state
-      const updatedUser = {
-        ...user,
-        name: formData.name,
-        username: formData.username,
-        email: formData.email
-      }
-      
-      login(updatedUser)
-      
-      // Show success notification
+      const token = localStorage.getItem('access_token')
+      const response = await axios.patch(
+        `${API_BASE_URL}/auth/profile`,
+        { name: formData.name, username: formData.username },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          }
+        }
+      )
+      const updatedUser = response.data?.user ?? response.data
+      if (updatedUser) updateUser(updatedUser)
       showNotification('Saved profile', 'Your profile has been successfully updated')
     } catch (error) {
       console.error('Error saving profile:', error)
+      const msg = error.response?.data?.error || error.response?.data?.message || 'Failed to save. Please try again.'
+      showNotification('Save failed', msg)
     } finally {
       setIsSaving(false)
     }
@@ -79,6 +90,56 @@ function ProfilePage() {
 
   const handleResetPassword = () => {
     navigate('/reset-password')
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      showNotification('Invalid file', 'Please upload a valid image (JPEG, PNG, GIF, WebP).')
+      return
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      showNotification('File too large', 'Please upload an image smaller than 5MB.')
+      return
+    }
+    setImageFile(file)
+    handleUploadAvatar(file)
+    e.target.value = ''
+  }
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleUploadAvatar = async (file) => {
+    if (!file) return
+    setIsUploadingAvatar(true)
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const token = localStorage.getItem('access_token')
+    try {
+      const response = await axios.put(`${API_BASE_URL}/auth/profile`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
+      })
+      const updatedUser = response.data?.user ?? response.data
+      if (updatedUser) updateUser(updatedUser)
+      showNotification('Profile picture updated', 'Your profile picture has been updated successfully.')
+    } catch (error) {
+      console.error('Error uploading avatar:', error)
+      const status = error.response?.status
+      const msg = error.response?.data?.error || error.response?.data?.message
+      const fallback = status === 404
+        ? 'API not found. Redeploy the server (bark-block-server) to enable profile upload.'
+        : 'Failed to upload. Please try again.'
+      showNotification('Upload failed', msg || fallback)
+    } finally {
+      setIsUploadingAvatar(false)
+      setImageFile(null)
+    }
   }
 
   if (!user) {
@@ -90,6 +151,14 @@ function ProfilePage() {
       <NavBar />
       
       <div className="flex-1 pt-[48px] lg:pt-[50px] pb-10">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          onChange={handleFileChange}
+          className="hidden"
+          aria-label="Choose profile picture"
+        />
         {/* Mobile Layout */}
         <div className="lg:hidden w-full px-4">
           {/* Tabs */}
@@ -153,8 +222,13 @@ function ProfilePage() {
                   </span>
                 )}
               </div>
-              <button className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors">
-                Upload profile picture
+              <button
+                type="button"
+                onClick={handleUploadClick}
+                disabled={isUploadingAvatar}
+                className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUploadingAvatar ? 'Uploading...' : 'Upload profile picture'}
               </button>
             </div>
 
@@ -263,8 +337,13 @@ function ProfilePage() {
                   </span>
                 )}
               </div>
-              <button className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors self-center">
-                Upload profile picture
+              <button
+                type="button"
+                onClick={handleUploadClick}
+                disabled={isUploadingAvatar}
+                className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors self-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUploadingAvatar ? 'Uploading...' : 'Upload profile picture'}
               </button>
             </div>
 

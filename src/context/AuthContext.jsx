@@ -148,6 +148,15 @@ export function AuthProvider({ children }) {
   }
 
   /**
+   * Update user data (e.g. after profile picture upload) without re-login
+   */
+  const updateUser = (userData) => {
+    if (!userData) return
+    setUser(userData)
+    localStorage.setItem('user', JSON.stringify(userData))
+  }
+
+  /**
    * Logout user
    */
   const logout = () => {
@@ -218,7 +227,8 @@ export function AuthProvider({ children }) {
     user,
     login,
     logout,
-    register
+    register,
+    updateUser
   }
 
   return (

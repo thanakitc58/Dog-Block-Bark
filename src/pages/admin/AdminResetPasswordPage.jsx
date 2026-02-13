@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext'
 function AdminResetPasswordPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const isAdmin = user?.role && user.role.toLowerCase() === 'admin'
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -27,10 +28,12 @@ function AdminResetPasswordPage() {
 
   useEffect(() => {
     // Check if user is admin
-    if (!user || !user.isAdmin) {
+    if (!user || !isAdmin) {
+      console.log('No user, redirecting to login', { user })
       navigate('/admin/login')
+      return
     }
-  }, [user, navigate])
+  }, [user, isAdmin, navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -111,7 +114,8 @@ function AdminResetPasswordPage() {
     }
   }
 
-  if (!user || !user.isAdmin) {
+  if (!user || !isAdmin) {
+    console.log('No user or not admin, returning null', { user, isAdmin })
     return null
   }
 

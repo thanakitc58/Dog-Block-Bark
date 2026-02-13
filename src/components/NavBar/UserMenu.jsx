@@ -28,6 +28,8 @@ function UserMenu({ onCloseMenu }) {
     }
   }, [])
 
+  const isAdmin = user?.role && user.role.toLowerCase() === 'admin'
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -45,6 +47,12 @@ function UserMenu({ onCloseMenu }) {
   const handleResetPassword = () => {
     // Navigate to reset password page
     navigate('/reset-password')
+    setIsDropdownOpen(false)
+    if (onCloseMenu) onCloseMenu()
+  }
+
+  const handleAdminDashboard = () => {
+    navigate('/admin/dashboard')
     setIsDropdownOpen(false)
     if (onCloseMenu) onCloseMenu()
   }
@@ -71,7 +79,7 @@ function UserMenu({ onCloseMenu }) {
               )}
             </div>
             <span className="font-sans text-[16px] font-medium leading-[24px] text-brown-600">
-              {user?.name || 'User'}
+              {user?.username || user?.name || 'User'}
             </span>
           </div>
           {/* Notifications Bell */}
@@ -94,6 +102,15 @@ function UserMenu({ onCloseMenu }) {
             <User className="w-5 h-5" />
             <span>Profile</span>
           </button>
+          {isAdmin && (
+            <button
+              onClick={handleAdminDashboard}
+              className="w-full px-4 py-3 text-left text-brown-600 hover:bg-brown-50 flex items-center gap-3 transition-colors font-sans text-[16px] font-medium"
+            >
+              <User className="w-5 h-5" />
+              <span>Admin panel</span>
+            </button>
+          )}
           <button
             onClick={handleResetPassword}
             className="w-full px-4 py-3 text-left text-brown-600 hover:bg-brown-50 flex items-center gap-3 transition-colors font-sans text-[16px] font-medium"
@@ -147,6 +164,10 @@ function UserMenu({ onCloseMenu }) {
               </span>
             )}
           </div>
+          {/* Username */}
+          <span className="font-sans text-[16px] font-medium text-brown-600 hidden sm:inline">
+            {user?.username || user?.name || 'User'}
+          </span>
           {/* Dropdown Arrow */}
           <ChevronDown
             className={`w-4 h-4 text-brown-600 transition-transform ${
@@ -165,6 +186,15 @@ function UserMenu({ onCloseMenu }) {
               <User className="w-4 h-4" />
               <span>Profile</span>
             </button>
+            {isAdmin && (
+              <button
+                onClick={handleAdminDashboard}
+                className="w-full px-4 py-2 text-left text-sm text-brown-600 hover:bg-brown-50 flex items-center gap-2 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                <span>Dashboard</span>
+              </button>
+            )}
             <button
               onClick={handleResetPassword}
               className="w-full px-4 py-2 text-left text-sm text-brown-600 hover:bg-brown-50 flex items-center gap-2 transition-colors"
