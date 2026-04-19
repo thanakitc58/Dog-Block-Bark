@@ -1,46 +1,75 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { useAuth } from '../../context/AuthContext'
+import articlesAPI from '../../api/articles'
 import LoginModal from './LoginModal'
 
 /**
  * ShareSection Component
  * Displays like button, copy link, and social media share buttons
- * 
+ *
  * Props:
- * @param {number} initialLikes - Initial number of likes
- * 
+ * @param {string|number} postId - Post ID for like API
+ * @param {number} initialLikes - Initial like count (from article)
+ *
  * Features:
- * - Like button with state management
- * - Copy link functionality
- * - Social media share buttons (Facebook, LinkedIn, Twitter)
- * - Login modal when clicking like without being logged in
- * - Responsive design (375px for mobile, responsive for larger screens)
+ * - Like button: logged-in users can like once per post; unauthenticated see login modal
+ * - Copy link and social share
+ * - Responsive design
  */
-function ShareSection({ initialLikes = 0 }) {
+function ShareSection({ postId, initialLikes = 0 }) {
   const navigate = useNavigate()
-  
-  // Mock authentication state (replace with actual auth check)
-  const [isLoggedIn] = useState(false)
-  
+  const { user, isAuthenticated } = useAuth()
+
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(initialLikes)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [likeLoading, setLikeLoading] = useState(false)
 
-  const handleLike = () => {
-    // Check if user is logged in
-    if (!isLoggedIn) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+
+  useEffect(() => {
+    if (!postId || !isAuthenticated || !token) {
+      setLikesCount((c) => (c === 0 && initialLikes > 0 ? initialLikes : c))
+      return
+    }
+    articlesAPI
+      .getLikeStatus(postId, token)
+      .then(({ liked, count }) => {
+        setIsLiked(Boolean(liked))
+        setLikesCount(typeof count === 'number' ? count : initialLikes)
+      })
+      .catch(() => {
+        setLikesCount(initialLikes)
+      })
+  }, [postId, isAuthenticated, token, initialLikes])
+
+  useEffect(() => {
+    if (!isAuthenticated) setLikesCount(initialLikes)
+  }, [initialLikes, isAuthenticated])
+
+  const handleLike = async () => {
+    if (!isAuthenticated) {
       setShowLoginModal(true)
       return
     }
-
-    // If logged in, proceed with like/unlike
-    if (isLiked) {
-      setLikesCount(prev => prev - 1)
-      setIsLiked(false)
-    } else {
-      setLikesCount(prev => prev + 1)
-      setIsLiked(true)
+    if (!postId || likeLoading) return
+    setLikeLoading(true)
+    try {
+      if (isLiked) {
+        const res = await articlesAPI.unlikePost(postId, token)
+        setIsLiked(res.liked === undefined ? false : Boolean(res.liked))
+        setLikesCount((prev) => (typeof res.count === 'number' ? res.count : prev - 1))
+      } else {
+        const res = await articlesAPI.likePost(postId, token)
+        setIsLiked(res.liked === undefined ? true : Boolean(res.liked))
+        setLikesCount((prev) => (typeof res.count === 'number' ? res.count : prev + 1))
+      }
+    } catch (err) {
+      toast.error('Failed to update like')
+    } finally {
+      setLikeLoading(false)
     }
   }
 
@@ -96,30 +125,32 @@ function ShareSection({ initialLikes = 0 }) {
       {/* Like Button - Full width on mobile */}
       <button
         onClick={handleLike}
-        className={`w-full lg:w-fit h-12 flex items-center justify-center gap-3 px-4 rounded-lg border transition-all duration-200 ${
-          isLiked
-            ? 'bg-brown-600 border-brown-600 text-white'
-            : 'bg-white border-brown-300 text-brown-600 hover:bg-brown-50'
-        }`}
+        disabled={likeLoading}
+        type="button"
+        className="w-full lg:w-fit h-12 flex items-center justify-center gap-3 px-4 rounded-lg border border-brown-300 bg-white text-brown-600 hover:bg-brown-50 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
         aria-label={isLiked ? 'Unlike' : 'Like'}
       >
-        {/* Smiley Icon - SVG with white fill for both mobile and desktop */}
-        <svg 
-          width="20" 
-          height="20" 
-          viewBox="0 0 24 24" 
-          fill="none" 
+        {/* Smiley Icon - สไตล์เดียวทั้ง liked/unliked (ภาพที่ 2) เปลี่ยนแค่ตัวเลข */}
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className={isLiked ? 'text-white' : 'text-brown-600'}
+          className="shrink-0 text-brown-600"
+          aria-hidden
         >
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill={isLiked ? 'white' : 'white'}/>
-          <circle cx="8" cy="9" r="1.5" fill={isLiked ? 'white' : 'currentColor'}/>
-          <circle cx="16" cy="9" r="1.5" fill={isLiked ? 'white' : 'currentColor'}/>
-          <path d="M8 14c0 2 2 4 4 4s4-2 4-4" stroke={isLiked ? 'white' : 'currentColor'} strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          <circle cx="8" cy="9" r="1.5" fill="currentColor" />
+          <circle cx="16" cy="9" r="1.5" fill="currentColor" />
+          <path
+            d="M8 14c0 2 2 4 4 4s4-2 4-4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
         </svg>
-        
-        {/* Like Count */}
-        <span className={`font-sans font-medium text-[16px] leading-[24px] ${isLiked ? 'text-white' : 'text-brown-600'}`}>
+        <span className="font-sans font-medium text-[16px] leading-[24px] text-brown-600">
           {likesCount}
         </span>
       </button>

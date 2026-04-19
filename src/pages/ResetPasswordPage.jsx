@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import NavBar from '../components/NavBar/NavBar'
 import Footer from '../components/footer/footer'
 import { useAuth } from '../context/AuthContext'
 import { useScrollToTop } from '../hooks/useScrollToTop'
 import ResetPasswordConfirmModal from '../components/profile/ResetPasswordConfirmModal'
 import SuccessModal from '../components/profile/SuccessModal'
+import { API_BASE_URL } from '../constants/api'
 import { User, RotateCcw, Eye, EyeOff } from 'lucide-react'
 
 /**
@@ -25,6 +27,7 @@ function ResetPasswordPage() {
   const [isResetting, setIsResetting] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [apiError, setApiError] = useState('')
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
@@ -101,25 +104,50 @@ function ResetPasswordPage() {
   const handleConfirmReset = async () => {
     setShowConfirmModal(false)
     setIsResetting(true)
+    setApiError('')
 
     try {
-      // TODO: Call API to reset password
-      console.log('Reset password:', {
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword
-      })
-      
-      // Show success modal
-      setShowSuccessModal(true)
-      
-      // Clear form
-      setFormData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      })
+      const token = localStorage.getItem('access_token')
+      if (!token) {
+        setApiError('Please log in again')
+        setIsResetting(false)
+        return
+      }
+
+      const response = await axios.put(
+        `${API_BASE_URL}/auth/reset-password`,
+        {
+          oldPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      if (response.status === 200) {
+        setShowSuccessModal(true)
+        setFormData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
+        setErrors({})
+      }
     } catch (error) {
       console.error('Error resetting password:', error)
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to reset password. Please try again.'
+      setApiError(errorMessage)
+      
+      if (error.response?.status === 400 && errorMessage.toLowerCase().includes('invalid old password')) {
+        setErrors({
+          ...errors,
+          currentPassword: 'Current password is incorrect'
+        })
+      }
     } finally {
       setIsResetting(false)
     }
@@ -304,6 +332,15 @@ function ResetPasswordPage() {
                 )}
               </div>
 
+              {/* API Error Message */}
+              {apiError && (
+                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="font-sans text-[14px] leading-[20px] text-red-600">
+                    {apiError}
+                  </p>
+                </div>
+              )}
+
               {/* Reset Password Button */}
               <button
                 type="submit"
@@ -471,6 +508,15 @@ function ResetPasswordPage() {
                   </p>
                 )}
               </div>
+
+              {/* API Error Message */}
+              {apiError && (
+                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="font-sans text-[14px] leading-[20px] text-red-600">
+                    {apiError}
+                  </p>
+                </div>
+              )}
 
               {/* Reset Password Button */}
               <button

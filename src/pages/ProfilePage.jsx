@@ -12,7 +12,7 @@ import { API_BASE_URL } from '../constants/api'
 
 /**
  * ProfilePage Component
- * User profile page with editable name, username, and email
+ * แก้ไขและอัปเดตรูปได้ (กด Save ถึงเปลี่ยน), Email แก้ไขไม่ได้, บันทึกได้แบบไม่กรอกทุกช่อง
  */
 function ProfilePage() {
   const navigate = useNavigate()
@@ -25,7 +25,7 @@ function ProfilePage() {
   })
   const [isSaving, setIsSaving] = useState(false)
   const [imageFile, setImageFile] = useState(null)
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [imagePreview, setImagePreview] = useState(null)
   const fileInputRef = useRef(null)
   const { notification, showNotification, hideNotification } = useNotification()
 
@@ -63,21 +63,36 @@ function ProfilePage() {
   const handleSave = async (e) => {
     e.preventDefault()
     setIsSaving(true)
+    const token = localStorage.getItem('access_token')
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
     try {
-      const token = localStorage.getItem('access_token')
-      const response = await axios.patch(
+      let updatedUser = null
+
+      if (imageFile) {
+        const form = new FormData()
+        form.append('avatar', imageFile)
+        const uploadRes = await axios.put(`${API_BASE_URL}/auth/profile`, form, {
+          headers: { 'Content-Type': 'multipart/form-data', ...headers }
+        })
+        updatedUser = uploadRes.data?.user ?? uploadRes.data
+        if (updatedUser) updateUser(updatedUser)
+        setImageFile(null)
+        if (imagePreview) {
+          URL.revokeObjectURL(imagePreview)
+          setImagePreview(null)
+        }
+      }
+
+      const patchRes = await axios.patch(
         `${API_BASE_URL}/auth/profile`,
         { name: formData.name, username: formData.username },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` })
-          }
-        }
+        { headers: { 'Content-Type': 'application/json', ...headers } }
       )
-      const updatedUser = response.data?.user ?? response.data
-      if (updatedUser) updateUser(updatedUser)
+      const patchedUser = patchRes.data?.user ?? patchRes.data
+      if (patchedUser) updateUser(patchedUser)
+      else if (updatedUser) updateUser({ ...updatedUser, name: formData.name, username: formData.username })
+
       showNotification('Saved profile', 'Your profile has been successfully updated')
     } catch (error) {
       console.error('Error saving profile:', error)
@@ -103,8 +118,9 @@ function ProfilePage() {
       showNotification('File too large', 'Please upload an image smaller than 5MB.')
       return
     }
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
     setImageFile(file)
-    handleUploadAvatar(file)
+    setImagePreview(URL.createObjectURL(file))
     e.target.value = ''
   }
 
@@ -112,35 +128,6 @@ function ProfilePage() {
     fileInputRef.current?.click()
   }
 
-  const handleUploadAvatar = async (file) => {
-    if (!file) return
-    setIsUploadingAvatar(true)
-    const formData = new FormData()
-    formData.append('avatar', file)
-    const token = localStorage.getItem('access_token')
-    try {
-      const response = await axios.put(`${API_BASE_URL}/auth/profile`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          ...(token && { Authorization: `Bearer ${token}` })
-        }
-      })
-      const updatedUser = response.data?.user ?? response.data
-      if (updatedUser) updateUser(updatedUser)
-      showNotification('Profile picture updated', 'Your profile picture has been updated successfully.')
-    } catch (error) {
-      console.error('Error uploading avatar:', error)
-      const status = error.response?.status
-      const msg = error.response?.data?.error || error.response?.data?.message
-      const fallback = status === 404
-        ? 'API not found. Redeploy the server (bark-block-server) to enable profile upload.'
-        : 'Failed to upload. Please try again.'
-      showNotification('Upload failed', msg || fallback)
-    } finally {
-      setIsUploadingAvatar(false)
-      setImageFile(null)
-    }
-  }
 
   if (!user) {
     return null
@@ -210,7 +197,13 @@ function ProfilePage() {
             {/* Profile Picture */}
             <div className="flex flex-col items-center mb-6">
               <div className="w-32 h-32 rounded-full bg-brown-300 flex items-center justify-center overflow-hidden mb-4">
-                {user.avatar ? (
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : user.avatar ? (
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
@@ -225,10 +218,10 @@ function ProfilePage() {
               <button
                 type="button"
                 onClick={handleUploadClick}
-                disabled={isUploadingAvatar}
+                disabled={isSaving}
                 className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUploadingAvatar ? 'Uploading...' : 'Upload profile picture'}
+                Upload profile picture
               </button>
             </div>
 
@@ -266,7 +259,7 @@ function ProfilePage() {
                 />
               </div>
 
-              {/* Email Field */}
+              {/* Email Field - ไม่สามารถแก้ไขได้ */}
               <div className="flex flex-col gap-2">
                 <label htmlFor="email" className="font-sans text-[14px] font-medium text-brown-400">
                   Email
@@ -277,6 +270,7 @@ function ProfilePage() {
                   name="email"
                   value={formData.email}
                   readOnly
+                  aria-label="Email (cannot be edited)"
                   className="w-full h-12 px-0 border-0 bg-transparent text-brown-400 font-sans text-[16px] leading-[24px] cursor-not-allowed"
                   placeholder="Enter your email"
                 />
@@ -325,7 +319,13 @@ function ProfilePage() {
             {/* Profile Picture Section */}
             <div className="flex items-start gap-6 mb-8">
               <div className="w-32 h-32 rounded-full bg-brown-300 flex items-center justify-center overflow-hidden shrink-0">
-                {user.avatar ? (
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : user.avatar ? (
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
@@ -340,10 +340,10 @@ function ProfilePage() {
               <button
                 type="button"
                 onClick={handleUploadClick}
-                disabled={isUploadingAvatar}
+                disabled={isSaving}
                 className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors self-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUploadingAvatar ? 'Uploading...' : 'Upload profile picture'}
+                Upload profile picture
               </button>
             </div>
 
@@ -384,7 +384,7 @@ function ProfilePage() {
                 />
               </div>
 
-              {/* Email Field */}
+              {/* Email Field - ไม่สามารถแก้ไขได้ */}
               <div className="flex flex-col gap-2">
                 <label htmlFor="email-desktop" className="font-sans text-[14px] font-medium text-brown-400">
                   Email
@@ -395,6 +395,7 @@ function ProfilePage() {
                   name="email"
                   value={formData.email}
                   readOnly
+                  aria-label="Email (cannot be edited)"
                   className="w-full h-12 px-0 border-0 bg-transparent text-brown-400 font-sans text-[16px] leading-[24px] cursor-not-allowed"
                   placeholder="Enter your email"
                 />

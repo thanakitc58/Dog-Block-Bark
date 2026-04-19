@@ -80,6 +80,30 @@ export const articlesAPI = {
   },
 
   /**
+   * Get posts for admin list with pagination and filters (7 per page, newest first)
+   * @param {number} page - Page number (1-based)
+   * @param {number} limit - Items per page (default 7)
+   * @param {string} category - Optional category filter
+   * @param {string} keyword - Optional search keyword
+   * @param {string} status - Optional status filter (e.g. Published, Draft)
+   * @returns {Promise<{ posts, currentPage, totalPages, totalPosts }>}
+   */
+  async getPostsForAdmin(page = 1, limit = 7, category = '', keyword = '', status = '') {
+    const params = { page, limit }
+    if (category) params.category = category
+    if (keyword) params.keyword = keyword
+    if (status) params.status = status
+    const response = await axios.get(`${BASE_URL}/posts`, { params })
+    const data = response.data
+    return {
+      posts: data.posts || [],
+      currentPage: data.currentPage || page,
+      totalPages: data.totalPages || 1,
+      totalPosts: data.totalPosts || 0
+    }
+  },
+
+  /**
    * Search articles by title, description, or content
    * @param {string} query - Search query string
    * @returns {Promise<Array>} Array of matching articles
@@ -179,6 +203,144 @@ export const articlesAPI = {
         throw error
       }
     }
+  },
+
+  /**
+   * Get like status for current user (requires auth)
+   * @param {string|number} postId - Post ID
+   * @param {string} token - Access token
+   * @returns {Promise<{ liked: boolean, count: number }>}
+   */
+  async getLikeStatus(postId, token) {
+    const response = await axios.get(`${BASE_URL}/posts/${postId}/like`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    return response.data
+  },
+
+  /**
+   * Like a post (requires auth, one like per user per post)
+   * @param {string|number} postId - Post ID
+   * @param {string} token - Access token
+   * @returns {Promise<{ liked: boolean, count: number }>}
+   */
+  async likePost(postId, token) {
+    const response = await axios.post(
+      `${BASE_URL}/posts/${postId}/like`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    return response.data
+  },
+
+  /**
+   * Unlike a post (requires auth)
+   * @param {string|number} postId - Post ID
+   * @param {string} token - Access token
+   * @returns {Promise<{ liked: boolean, count: number }>}
+   */
+  async unlikePost(postId, token) {
+    const response = await axios.delete(`${BASE_URL}/posts/${postId}/like`, {
+      headers: { Authorization: `Bearer ${token}` } }
+    )
+    return response.data
+  },
+
+  /**
+   * Get comments for a post
+   * @param {string|number} postId - Post ID
+   * @returns {Promise<{ comments: Array }>}
+   */
+  async getComments(postId) {
+    const response = await axios.get(`${BASE_URL}/posts/${postId}/comments`)
+    return response.data
+  },
+
+  /**
+   * Create a comment (requires auth)
+   * @param {string|number} postId - Post ID
+   * @param {string} content - Comment text
+   * @param {string} token - Access token
+   * @returns {Promise<{ comment: Object }>}
+   */
+  async createComment(postId, content, token) {
+    const response = await axios.post(
+      `${BASE_URL}/posts/${postId}/comments`,
+      { content },
+      { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } }
+    )
+    return response.data
+  },
+
+  async getCategories() {
+    const response = await axios.get(`${BASE_URL}/posts/categories`)
+    return response.data
+  },
+
+  async createCategory(name) {
+    const response = await axios.post(`${BASE_URL}/posts/categories`, { name })
+    return response.data
+  },
+
+  async getStatuses() {
+    const response = await axios.get(`${BASE_URL}/posts/statuses`)
+    return response.data
+  },
+
+  async uploadPostImage(file, token) {
+    const formData = new FormData()
+    formData.append('image', file)
+    const headers = { 'Content-Type': 'multipart/form-data' }
+    if (token) headers.Authorization = `Bearer ${token}`
+    const response = await axios.post(`${BASE_URL}/posts/upload-image`, formData, { headers })
+    return response.data
+  },
+
+  async createPost(body, token) {
+    const headers = { 'Content-Type': 'application/json' }
+    if (token) headers.Authorization = `Bearer ${token}`
+    const response = await axios.post(`${BASE_URL}/posts`, body, { headers })
+    return response.data
+  },
+
+  async getPostById(postId) {
+    const response = await axios.get(`${BASE_URL}/posts/${postId}`)
+    return response.data?.data ?? response.data
+  },
+
+  async updatePost(postId, body, token) {
+    const headers = { 'Content-Type': 'application/json' }
+    if (token) headers.Authorization = `Bearer ${token}`
+    const response = await axios.put(`${BASE_URL}/posts/${postId}`, body, { headers })
+    return response.data
+  },
+
+  async deletePost(postId, token) {
+    const headers = {}
+    if (token) headers.Authorization = `Bearer ${token}`
+    const response = await axios.delete(`${BASE_URL}/posts/${postId}`, { headers })
+    return response.data
+  },
+
+  async getNotifications(page = 1, limit = 6) {
+    const response = await axios.get(`${BASE_URL}/notifications`, {
+      params: { page, limit }
+    })
+    const data = response.data
+    return {
+      notifications: data?.notifications ?? [],
+      currentPage: data?.currentPage ?? page,
+      totalPages: data?.totalPages ?? 1,
+      total: data?.total ?? 0
+    }
+  },
+
+  /** แจ้งเตือนสำหรับ user ที่ login: admin โพสใหม่ + มีคน comment ในโพสที่เราเคย comment */
+  async getMyNotifications(token) {
+    const headers = {}
+    if (token) headers.Authorization = `Bearer ${token}`
+    const response = await axios.get(`${BASE_URL}/auth/notifications`, { headers })
+    return response.data?.notifications ?? []
   }
 }
 

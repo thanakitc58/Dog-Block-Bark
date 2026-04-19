@@ -66,7 +66,7 @@ function ArticleDetail({ article, onBack }) {
 
               {/* Article Content */}
               <div className="prose prose-lg max-w-none">
-                {/* Render Markdown content using ReactMarkdown */}
+                {/* Render Markdown: ## ต้องมี space หลังถึงจะไม่โชว์บน UI จึง normalize ##1. เป็น ## 1. */}
                 {article.content && (
                   <div className="text-brown-600">
                     <ReactMarkdown
@@ -79,7 +79,7 @@ function ArticleDetail({ article, onBack }) {
                         ),
                       }}
                     >
-                      {article.content}
+                      {(article.content || '').replace(/(^|\n)(##)(?=[^\s#])/g, '$1$2 ')}
                     </ReactMarkdown>
                   </div>
                 )}
@@ -92,12 +92,15 @@ function ArticleDetail({ article, onBack }) {
 
               {/* Share Section - Below content for lg, below AuthorBio for mobile */}
               <div className="mt-6 lg:mt-8">
-                <ShareSection initialLikes={article.likes || 0} />
+                <ShareSection
+                postId={article.id}
+                initialLikes={article.likes_count ?? article.likes ?? 0}
+              />
               </div>
 
               {/* Comment Section - Below Share Section for lg, same width as content */}
               <div className="mt-6 lg:mt-8">
-                <CommentSection />
+                <CommentSection postId={article.id} />
               </div>
             </div>
 
