@@ -1,128 +1,172 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import articlesAPI from '../../api/articles'
 
 /**
  * CommentSection Component
- * Displays comment input form and list of comments
- * 
- * Mobile (375px - 768px):
- * - Container: width 375px, height 826px, gap 44px, padding 24px top, 16px left/right, 40px bottom
- * - Comment input section: width 343px, height 190px, gap 12px
- * - User comments section: width 343px, height 528px, gap 24px
+ * Displays comment input form and list of comments for a post.
+ * User or admin must be logged in to send a comment.
+ *
+ * @param {string|number} postId - Post ID to load and submit comments for
  */
-function CommentSection() {
+function CommentSection({ postId }) {
+  const { user, isAuthenticated } = useAuth()
   const [commentText, setCommentText] = useState('')
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      author: 'Jacob Lash',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-      date: '12 September 2024 at 18:30',
-      text: 'I loved this article! It really explains why my cat is so independent yet loving. The purring section was super interesting.'
-    },
-    {
-      id: 2,
-      author: 'Ahri',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-      date: '12 September 2024 at 18:30',
-      text: 'Such a great read! I\'ve always wondered why my cat slow blinks at me—now I know it\'s her way of showing trust!'
-    },
-    {
-      id: 3,
-      author: 'Mimi mama',
-      avatar: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=100&h=100&fit=crop',
-      date: '12 September 2024 at 18:30',
-      text: 'This article perfectly captures why cats make such amazing pets. I had no idea their purring could help with healing. Fascinating stuff!'
-    }
-  ])
+  const [comments, setComments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+
+  const formatCommentDate = (isoDate) => {
+    if (!isoDate) return ''
+    try {
+      const d = new Date(isoDate)
+      if (isNaN(d.getTime())) return isoDate
+      return d.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch {
+      return isoDate
+    }
+  }
+
+  useEffect(() => {
+    if (!postId) {
+      setComments([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    setError('')
+    articlesAPI
+      .getComments(postId)
+      .then((data) => {
+        const list = Array.isArray(data.comments) ? data.comments : []
+        setComments(list)
+      })
+      .catch(() => {
+        setComments([])
+        setError('Failed to load comments')
+      })
+      .finally(() => setLoading(false))
+  }, [postId])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (commentText.trim()) {
-      // TODO: Add comment to API
-      const newComment = {
-        id: comments.length + 1,
-        author: 'You',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-        date: new Date().toLocaleDateString('en-GB', { 
-          day: 'numeric', 
-          month: 'long', 
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        text: commentText.trim()
+    const trimmed = commentText.trim()
+    if (!trimmed) return
+
+    if (!isAuthenticated || !token) {
+      setError('Please log in to comment')
+      return
+    }
+
+    setSending(true)
+    setError('')
+    try {
+      const data = await articlesAPI.createComment(postId, trimmed, token)
+      const newComment = data.comment
+      if (newComment) {
+        setComments((prev) => [
+          ...prev,
+          {
+            id: newComment.id,
+            author_name: newComment.author_name || user?.name || 'User',
+            author_avatar: newComment.author_avatar || user?.avatar || user?.profilePic,
+            created_at: newComment.created_at,
+            content: newComment.content
+          }
+        ])
+        setCommentText('')
       }
-      setComments([...comments, newComment])
-      setCommentText('')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send comment')
+    } finally {
+      setSending(false)
     }
   }
 
   return (
-    <div className="w-full h-auto min-h-[826px] flex flex-col gap-[44px]  lg:rounded-lg ">
+    <div className="w-full h-auto min-h-[826px] flex flex-col gap-[44px] lg:rounded-lg">
       {/* Comment Input Section */}
       <div className="w-full h-auto min-h-[190px] flex flex-col gap-3">
-        {/* Comment Heading */}
         <h3 className="text-brown-400 font-medium text-base leading-6 font-poppins">
           Comment
         </h3>
 
-        {/* Comment Form */}
         <form onSubmit={handleSubmit} className="w-full h-auto min-h-[130px] flex flex-col gap-3">
-          {/* Text Input */}
           <textarea
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder="What are your thoughts?"
-            className="w-full h-[130px] px-4 py-3 rounded-lg border border-brown-300 bg-white text-brown-600 placeholder-brown-400 focus:outline-none focus:ring-2 focus:ring-brown-300 focus:border-brown-400 resize-none text-base leading-6"
+            placeholder={isAuthenticated ? 'What are your thoughts?' : 'Log in to leave a comment'}
+            disabled={!isAuthenticated}
+            className="w-full h-[130px] px-4 py-3 rounded-lg border border-brown-300 bg-white text-brown-600 placeholder-brown-400 focus:outline-none focus:ring-2 focus:ring-brown-300 focus:border-brown-400 resize-none text-base leading-6 disabled:opacity-60 disabled:cursor-not-allowed"
           />
 
-          {/* Send Button */}
+          {error && (
+            <p className="text-red-600 text-sm">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="w-[121px] h-12 flex items-center justify-center gap-1.5 px-10 py-3 rounded-full bg-brown-600 text-white font-medium hover:bg-brown-700 transition-colors text-base leading-6 lg:items-end"
+            disabled={!commentText.trim() || sending || !isAuthenticated}
+            className="w-[121px] h-12 flex items-center justify-center gap-1.5 px-10 py-3 rounded-full bg-brown-600 text-white font-medium hover:bg-brown-700 transition-colors text-base leading-6 lg:items-end disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Send
+            {sending ? 'Sending...' : 'Send'}
           </button>
         </form>
       </div>
 
       {/* User Comments Section */}
       <div className="w-full h-auto min-h-[528px] flex flex-col gap-6">
-        {comments.map((comment, index) => (
-          <div 
-            key={comment.id} 
-            className={`w-full h-auto min-h-[136px] flex flex-col gap-4 ${index !== comments.length - 1 ? 'border-b border-brown-200 pb-6' : ''}`}
-          >
-            {/* User Info */}
-            <div className="w-full max-w-[219px] h-12 flex items-center gap-3">
-              {/* Avatar */}
-              <img
-                src={comment.avatar}
-                alt={comment.author}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-              
-              {/* Name and Date */}
-              <div className="flex flex-col gap-0">
-                <span className="text-brown-600 font-medium text-[20px] leading-6">
-                  {comment.author}
-                </span>
-                <span className="text-brown-400 text-[12px] leading-5">
-                  {comment.date}
-                </span>
+        {loading ? (
+          <p className="text-brown-400 text-sm">Loading comments...</p>
+        ) : comments.length === 0 ? (
+          <p className="text-brown-400 text-sm">No comments yet. Be the first to comment.</p>
+        ) : (
+          comments.map((comment, index) => (
+            <div
+              key={comment.id}
+              className={`w-full h-auto min-h-[136px] flex flex-col gap-4 ${index !== comments.length - 1 ? 'border-b border-brown-200 pb-6' : ''}`}
+            >
+              <div className="w-full max-w-[219px] h-12 flex items-center gap-3">
+                {comment.author_avatar ? (
+                  <img
+                    src={comment.author_avatar}
+                    alt={comment.author_name || 'User'}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-brown-300 flex items-center justify-center shrink-0">
+                    <span className="text-brown-600 font-medium text-sm">
+                      {(comment.author_name || 'U').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <div className="flex flex-col gap-0">
+                  <span className="text-brown-600 font-medium text-[20px] leading-6">
+                    {comment.author_name || 'User'}
+                  </span>
+                  <span className="text-brown-400 text-[12px] leading-5">
+                    {formatCommentDate(comment.created_at)}
+                  </span>
+                </div>
               </div>
+              <p className="text-brown-400 text-base leading-6 font-medium tracking-normal">
+                {comment.content}
+              </p>
             </div>
-
-            {/* Comment Text */}
-            <p className="text-brown-400 text-base leading-6 font-medium tracking-normal">
-              {comment.text}
-            </p>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   )
 }
 
 export default CommentSection
-

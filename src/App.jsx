@@ -11,6 +11,8 @@ import LoginPage from './pages/LoginPage'
 import RegistrationSuccessPage from './pages/RegistrationSuccessPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminCreateArticlePage from './pages/admin/AdminCreateArticlePage'
+import AdminEditArticlePage from './pages/admin/AdminEditArticlePage'
 import AdminProfilePage from './pages/admin/AdminProfilePage'
 import AdminResetPasswordPage from './pages/admin/AdminResetPasswordPage'
 import HealthTestPage from './pages/HealthTestPage'
@@ -56,6 +58,8 @@ function App() {
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard/create" element={<AdminCreateArticlePage />} />
+          <Route path="/admin/dashboard/edit/:id" element={<AdminEditArticlePage />} />
           <Route path="/admin/categories" element={<AdminDashboard />} />
           <Route path="/admin/notifications" element={<AdminDashboard />} />
           <Route path="/admin/profile" element={<AdminProfilePage />} />

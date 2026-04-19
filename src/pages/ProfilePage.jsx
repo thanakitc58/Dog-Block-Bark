@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import NavBar from '../components/NavBar/NavBar'
 import Footer from '../components/footer/footer'
 import { useAuth } from '../context/AuthContext'
@@ -7,14 +8,15 @@ import { useScrollToTop } from '../hooks/useScrollToTop'
 import { useNotification } from '../hooks/useNotification'
 import SuccessNotification from '../components/profile/SuccessNotification'
 import { User, RotateCcw } from 'lucide-react'
+import { API_BASE_URL } from '../constants/api'
 
 /**
  * ProfilePage Component
- * User profile page with editable name, username, and email
+ * แก้ไขและอัปเดตรูปได้ (กด Save ถึงเปลี่ยน), Email แก้ไขไม่ได้, บันทึกได้แบบไม่กรอกทุกช่อง
  */
 function ProfilePage() {
   const navigate = useNavigate()
-  const { user, login } = useAuth()
+  const { user, updateUser } = useAuth()
   const [activeTab, setActiveTab] = useState('profile')
   const [formData, setFormData] = useState({
     name: '',
@@ -22,7 +24,13 @@ function ProfilePage() {
     email: ''
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const fileInputRef = useRef(null)
   const { notification, showNotification, hideNotification } = useNotification()
+
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5MB
 
   useScrollToTop()
 
@@ -55,23 +63,41 @@ function ProfilePage() {
   const handleSave = async (e) => {
     e.preventDefault()
     setIsSaving(true)
+    const token = localStorage.getItem('access_token')
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
     try {
-      // TODO: Call API to save profile
-      // For now, update local state
-      const updatedUser = {
-        ...user,
-        name: formData.name,
-        username: formData.username,
-        email: formData.email
+      let updatedUser = null
+
+      if (imageFile) {
+        const form = new FormData()
+        form.append('avatar', imageFile)
+        const uploadRes = await axios.put(`${API_BASE_URL}/auth/profile`, form, {
+          headers: { 'Content-Type': 'multipart/form-data', ...headers }
+        })
+        updatedUser = uploadRes.data?.user ?? uploadRes.data
+        if (updatedUser) updateUser(updatedUser)
+        setImageFile(null)
+        if (imagePreview) {
+          URL.revokeObjectURL(imagePreview)
+          setImagePreview(null)
+        }
       }
-      
-      login(updatedUser)
-      
-      // Show success notification
+
+      const patchRes = await axios.patch(
+        `${API_BASE_URL}/auth/profile`,
+        { name: formData.name, username: formData.username },
+        { headers: { 'Content-Type': 'application/json', ...headers } }
+      )
+      const patchedUser = patchRes.data?.user ?? patchRes.data
+      if (patchedUser) updateUser(patchedUser)
+      else if (updatedUser) updateUser({ ...updatedUser, name: formData.name, username: formData.username })
+
       showNotification('Saved profile', 'Your profile has been successfully updated')
     } catch (error) {
       console.error('Error saving profile:', error)
+      const msg = error.response?.data?.error || error.response?.data?.message || 'Failed to save. Please try again.'
+      showNotification('Save failed', msg)
     } finally {
       setIsSaving(false)
     }
@@ -80,6 +106,28 @@ function ProfilePage() {
   const handleResetPassword = () => {
     navigate('/reset-password')
   }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      showNotification('Invalid file', 'Please upload a valid image (JPEG, PNG, GIF, WebP).')
+      return
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      showNotification('File too large', 'Please upload an image smaller than 5MB.')
+      return
+    }
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+    e.target.value = ''
+  }
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click()
+  }
+
 
   if (!user) {
     return null
@@ -90,6 +138,14 @@ function ProfilePage() {
       <NavBar />
       
       <div className="flex-1 pt-[48px] lg:pt-[50px] pb-10">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          onChange={handleFileChange}
+          className="hidden"
+          aria-label="Choose profile picture"
+        />
         {/* Mobile Layout */}
         <div className="lg:hidden w-full px-4">
           {/* Tabs */}
@@ -141,7 +197,13 @@ function ProfilePage() {
             {/* Profile Picture */}
             <div className="flex flex-col items-center mb-6">
               <div className="w-32 h-32 rounded-full bg-brown-300 flex items-center justify-center overflow-hidden mb-4">
-                {user.avatar ? (
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : user.avatar ? (
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
@@ -153,7 +215,12 @@ function ProfilePage() {
                   </span>
                 )}
               </div>
-              <button className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors">
+              <button
+                type="button"
+                onClick={handleUploadClick}
+                disabled={isSaving}
+                className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Upload profile picture
               </button>
             </div>
@@ -192,7 +259,7 @@ function ProfilePage() {
                 />
               </div>
 
-              {/* Email Field */}
+              {/* Email Field - ไม่สามารถแก้ไขได้ */}
               <div className="flex flex-col gap-2">
                 <label htmlFor="email" className="font-sans text-[14px] font-medium text-brown-400">
                   Email
@@ -203,6 +270,7 @@ function ProfilePage() {
                   name="email"
                   value={formData.email}
                   readOnly
+                  aria-label="Email (cannot be edited)"
                   className="w-full h-12 px-0 border-0 bg-transparent text-brown-400 font-sans text-[16px] leading-[24px] cursor-not-allowed"
                   placeholder="Enter your email"
                 />
@@ -251,7 +319,13 @@ function ProfilePage() {
             {/* Profile Picture Section */}
             <div className="flex items-start gap-6 mb-8">
               <div className="w-32 h-32 rounded-full bg-brown-300 flex items-center justify-center overflow-hidden shrink-0">
-                {user.avatar ? (
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : user.avatar ? (
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
@@ -263,7 +337,12 @@ function ProfilePage() {
                   </span>
                 )}
               </div>
-              <button className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors self-center">
+              <button
+                type="button"
+                onClick={handleUploadClick}
+                disabled={isSaving}
+                className="px-6 py-2 bg-white border border-brown-600 text-brown-600 rounded-full font-sans text-[14px] font-medium hover:bg-brown-50 transition-colors self-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Upload profile picture
               </button>
             </div>
@@ -305,7 +384,7 @@ function ProfilePage() {
                 />
               </div>
 
-              {/* Email Field */}
+              {/* Email Field - ไม่สามารถแก้ไขได้ */}
               <div className="flex flex-col gap-2">
                 <label htmlFor="email-desktop" className="font-sans text-[14px] font-medium text-brown-400">
                   Email
@@ -316,6 +395,7 @@ function ProfilePage() {
                   name="email"
                   value={formData.email}
                   readOnly
+                  aria-label="Email (cannot be edited)"
                   className="w-full h-12 px-0 border-0 bg-transparent text-brown-400 font-sans text-[16px] leading-[24px] cursor-not-allowed"
                   placeholder="Enter your email"
                 />

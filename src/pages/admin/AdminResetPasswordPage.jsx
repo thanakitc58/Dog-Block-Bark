@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext'
 function AdminResetPasswordPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const isAdmin = user?.role && user.role.toLowerCase() === 'admin'
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -27,10 +28,12 @@ function AdminResetPasswordPage() {
 
   useEffect(() => {
     // Check if user is admin
-    if (!user || !user.isAdmin) {
+    if (!user || !isAdmin) {
+      console.log('No user, redirecting to login', { user })
       navigate('/admin/login')
+      return
     }
-  }, [user, navigate])
+  }, [user, isAdmin, navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -111,7 +114,8 @@ function AdminResetPasswordPage() {
     }
   }
 
-  if (!user || !user.isAdmin) {
+  if (!user || !isAdmin) {
+    console.log('No user or not admin, returning null', { user, isAdmin })
     return null
   }
 
@@ -137,7 +141,7 @@ function AdminResetPasswordPage() {
 
           {/* Content Area */}
           <div className="flex-1 overflow-auto">
-            <div className="w-[1160px] min-h-[656px] px-[60px] pt-10 pb-[120px] flex flex-col gap-10">
+            <div className="w-[1160px] ml-[100px] min-h-[656px] px-[60px] pt-10 pb-[120px] flex flex-col gap-10">
               {/* Top Bar with Reset Button */}
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold text-brown-900">Reset password</h2>
