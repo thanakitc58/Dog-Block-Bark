@@ -1,110 +1,76 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import './App.css'
-
+import { AuthProvider } from './context/AuthContext'
+import HomePage from './pages/HomePage'
+import ArticleDetailPage from './pages/ArticleDetailPage'
+import ProfilePage from './pages/ProfilePage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+import SignUpPage from './pages/SignUpPage'
+import LoginPage from './pages/LoginPage'
+import RegistrationSuccessPage from './pages/RegistrationSuccessPage'
+import AdminLoginPage from './pages/admin/AdminLoginPage'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminCreateArticlePage from './pages/admin/AdminCreateArticlePage'
+import AdminEditArticlePage from './pages/admin/AdminEditArticlePage'
+import AdminProfilePage from './pages/admin/AdminProfilePage'
+import AdminResetPasswordPage from './pages/admin/AdminResetPasswordPage'
+import HealthTestPage from './pages/HealthTestPage'
+/**
+ * App Component
+ * Main application component with routing setup
+ * 
+ * Routes:
+ * - / : Home page with article list
+ * - /article/:id : Article detail page
+ * - /signup : Sign up page
+ * - /login : Login page
+ */
 function App() {
   return (
-    <main className="p-8 bg-white min-h-screen">
-      {/* Colors Section */}
-      <section className="mb-12">
-        <h2 className="text-headline-2 text-brown-600 mb-6">Colors</h2>
-        
-        {/* Base Colors */}
-        <article className="mb-8">
-          <h3 className="text-headline-3 text-brown-600 mb-4">Base</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brown-600 rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Brown 600</p>
-              <p className="text-body-2 text-brown-400">#26231E</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brown-500 rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Brown 500</p>
-              <p className="text-body-2 text-brown-400">#43403B</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brown-400 rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Brown 400</p>
-              <p className="text-body-2 text-brown-400">#75716B</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brown-300 rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Brown 300</p>
-              <p className="text-body-2 text-brown-400">#DAD6D1</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brown-200 rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Brown 200</p>
-              <p className="text-body-2 text-brown-400">#EFEEEB</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brown-100 rounded mb-2 border border-brown-300"></div>
-              <p className="text-body-1 text-brown-600">Brown 100</p>
-              <p className="text-body-2 text-brown-400">#F9F8F6</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-white rounded mb-2 border border-brown-300"></div>
-              <p className="text-body-1 text-brown-600">White</p>
-              <p className="text-body-2 text-brown-400">#FFFFFF</p>
-            </div>
-          </div>
-        </article>
-
-        {/* Brand Colors */}
-        <article>
-          <h3 className="text-headline-3 text-brown-600 mb-4">Brand</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brand-orange rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Orange</p>
-              <p className="text-body-2 text-brown-400">#F2B68C</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brand-green rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Green</p>
-              <p className="text-body-2 text-brown-400">#12B279</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brand-green-soft rounded mb-2 border border-brown-300"></div>
-              <p className="text-body-1 text-brown-600">Green</p>
-              <p className="text-body-2 text-brown-400">#D7F2E9</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="w-full h-24 bg-brand-red rounded mb-2"></div>
-              <p className="text-body-1 text-brown-600">Red</p>
-              <p className="text-body-2 text-brown-400">#EB5164</p>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      {/* Typography Section */}
-      <section>
-        <h2 className="text-headline-2 text-brown-600 mb-6">Fonts</h2>
-        <div className="space-y-4">
-          <div className="p-4 border border-brand-green rounded">
-            <p className="text-headline-1">Headline 1</p>
-          </div>
-          <div className="p-4 border border-brown-300 rounded">
-            <p className="text-headline-2 text-brown-600">Headline 2</p>
-          </div>
-          <div className="p-4 border border-brown-300 rounded">
-            <p className="text-headline-3 text-brown-600">Headline 3</p>
-          </div>
-          <div className="p-4 border border-brown-300 rounded">
-            <p className="text-headline-4 text-brown-600">Headline 4</p>
-          </div>
-          <div className="p-4 border border-brown-300 rounded">
-            <p className="text-body-1 text-brown-600">Body 1</p>
-          </div>
-          <div className="p-4 border border-brown-300 rounded">
-            <p className="text-body-2 text-brown-600">Body 2</p>
-          </div>
-          <div className="p-4 border border-brown-300 rounded">
-            <p className="text-body-3 text-brown-600">Body 3</p>
-          </div>
-        </div>
-      </section>
-    </main>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Home Page Route */}
+          <Route path="/" element={<HomePage />} />
+          
+          {/* Article List Page Route */}
+          <Route path="/article" element={<HomePage />} />
+          
+          {/* Article Detail Page Route */}
+          <Route path="/article/:id" element={<ArticleDetailPage />} />
+          
+          {/* Profile Page Route */}
+          <Route path="/profile" element={<ProfilePage />} />
+          
+          {/* Reset Password Page Route */}
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          
+          {/* Sign Up Page Route */}
+          <Route path="/signup" element={<SignUpPage />} />
+          
+          {/* Login Page Route */}
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* Registration Success Page Route */}
+          <Route path="/success" element={<RegistrationSuccessPage />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard/create" element={<AdminCreateArticlePage />} />
+          <Route path="/admin/dashboard/edit/:id" element={<AdminEditArticlePage />} />
+          <Route path="/admin/categories" element={<AdminDashboard />} />
+          <Route path="/admin/notifications" element={<AdminDashboard />} />
+          <Route path="/admin/profile" element={<AdminProfilePage />} />
+          <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
+          <Route path="/test-health" element={<HealthTestPage />} />
+          {/* Catch all - redirect to home */}
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+        <Toaster position="bottom-right" richColors />
+      </Router>
+    </AuthProvider>
   )
 }
 
